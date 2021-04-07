@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" href="/favicon.ico" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/lioshi.min.css">
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>M1ck83</title>
+
+
+
+<link rel="modulepreload" href="/./_app/start-e33718b2.js">
+			<link rel="modulepreload" href="/./_app/chunks/vendor-880bcda5.js">
+			<link rel="modulepreload" href="/./_app/pages/blog/[slug].svelte-d87726da.js">
+			<link rel="modulepreload" href="/./_app/chunks/dateFormatter-0d66685c.js">
+			<link rel="stylesheet" href="/./_app/assets/start-37448667.css">
+			<link rel="stylesheet" href="/./_app/assets/pages/blog/[slug].svelte-773d461f.css">
+
+
+		<script type="module">
+			import { start } from "/./_app/start-e33718b2.js";
+			start({
+				target: document.querySelector("#svelte"),
+				paths: {"base":"","assets":"/."},
+				session: {},
+				host: location.host,
+				route: true,
+				hydrate: {
+					status: 200,
+					error: null,
+					nodes: [
+						import("/./_app/pages/blog/[slug].svelte-d87726da.js")
+					],
+					page: {
+						host: location.host, // TODO this is redundant
+						path: "/blog/sfdy-copy-2",
+						query: new URLSearchParams(""),
+						params: {"slug":"sfdy-copy-2"}
+					}
+				}
+			});
+		</script>
+	</head>
+	<body>
+		<div id="svelte">
+
+
+<div class="sm:m-4"><div class="container max-w-screen-md mx-auto bg-white flex flex-col svelte-pbdknq" style="min-height: 90vh"><header class="flex justify-between items-center h-16 top-0 p-2 border-b-4 border-brand bg-white"><a class="flex items-center" href="/" style="transform: scale(0.8)"><img class="rounded-full w-12" src="https://www.gravatar.com/avatar/777ffbb5509e27aeb1c1816b45ab77f4" alt="logo">
+        <h1 class="text-3xl pl-4">M1ck83</h1></a>
+      <nav class="flex mr-3 svelte-pbdknq"><a href="/" class="svelte-pbdknq">Blog</a>
+        <a href="/about" class="svelte-pbdknq">About</a></nav></header>
+    <section class="p-1 sm:mx-8 overflow-x-auto flex-grow">
+
+<article class="m-4 mt-8 prose prose-lg prose-green">
+  <div class="pub-date svelte-1v34gb3">1 January 2021</div>
+  <h1>Sfdy copy 2</h1>
+  <p>sfdy is a command line tool to work with the <a href="https://developer.salesforce.com/docs/atlas.en-us.api_meta.meta/api_meta/meta_intro.htm">Salesforce Metadata API</a>.
+It has been built to work around strange behaviours and known limitations of the api, and to simplify the implementation of a continuous integration process. It applies <a href="#apply-standard-patches-and-renderers-to-metadata">useful patches</a> to avoid common problems when deploying metadata, and it exposes a simple interface to <a href="#build-your-own-plugins">build your own plugins</a></p>
+<ol>
+<li><a href="#requirements">Requirements</a></li>
+<li><a href="#usage">Usage</a></li>
+<li><a href="#why-not-sfdx">Why not SFDX?</a></li>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#features">Features</a></li>
+<li><a href="#changelog">Changelog</a></li>
+</ol>
+<h2 id="requirements">Requirements</h2>
+<ul>
+<li><a href="https://nodejs.org/en/">Node.js</a> at least <code>10.x.x</code></li>
+</ul>
+<h2 id="usage">Usage</h2>
+<p><code>sfdy</code> is meant to be mainly used as a command line tool. It can also be used a library since it exposes a small <a href="#use-sfdy-as-a-library">API</a>.</p>
+<p>Type <code>sfdy --help</code> to see available commands. Type <code>sfdy [command] --help</code> to see available options for a specific command</p>
+<h2 id="why-not-sfdx">Why not SFDX?</h2>
+<p><a href="https://developer.salesforce.com/tools/sfdxcli">SFDX</a> is a tool to work with scratch orgs and with modular projects.</p>
+<p>In a typical salesforce project, development starts in a scratch org or in a classic sandbox.
+Even if you use scratch orgs, however, sooner or later you&#39;ll have to deploy your sfdx project to a classic sandbox (a shared, persistant development sandbox used to test integrations, an UAT sandbox, etc.). After the code is deployed to a classic sandbox, we are right back where we started.</p>
+<p>Moreover, DX requires the developer to break down their entire Enterprise org into individual projects, but sometimes this is not possible/advisable or the sub-projects are still too big to be worked on by a single developer. Salesforce metadata are deeply interconnected, and every module is very likely to use a subset of common functionalities (standard objects, layout, flexipages). It is often a nightmare to divide an enterprise project in modules, because those modules are not really independent from each other.</p>
+<p>Finally, this tool solves some problems that SFDX does not address, and gives the developer an easy way to customize a Salesforce CI process the way HE/SHE wants. To have the best possible experience, use this tool in conjunction with the vscode plugin <a href="https://marketplace.visualstudio.com/items?itemName=m1ck83.fast-sfdc">fast-sfdc</a>. patches and even your custom plugins are automatically applied in both your CI flow and your local development environment!</p>
+<h2 id="installation">Installation</h2>
+<pre><code>$ npm install -g sfdy
+</code></pre>
+<p>then go to the root folder of a Salesforce project, and type</p>
+<pre><code>$ sfdy init
+</code></pre>
+<p>this command creates a <code>.sfdy.json</code> file whithin the root folder of your current workspace with the configuration of the &#39;standard&#39; patches (more on this <a href="#apply-standard-patches-and-renderers-to-metadata">later</a>)</p>
+<h2 id="features">Features</h2>
+<ol>
+<li><a href="#retrieve-full-metadata">Retrieve full metadata (based on package.xml)</a></li>
+<li><a href="#retrieve-partial-metadata">Retrieve partial metadata (glob pattern or metadata-based)</a></li>
+<li><a href="#deploy-full-metadata">Deploy full metadata (based on package.xml)</a></li>
+<li><a href="#deploy-partial-metadata">Deploy partial metadata (glob pattern or diff between 2 git branches)</a></li>
+<li><a href="#deploy-a-destructive-changeset">Deploy a destructive changeset (glob pattern or metadata-based)</a></li>
+<li><a href="#apply-standard-patches-and-renderers-to-metadata">Apply &#39;standard&#39; patches and renderers to metadata</a></li>
+<li><a href="#build-your-own-plugins">Build your own plugins (pre-deploy and after-retrieve)</a></li>
+<li><a href="#build-your-own-renderers">Build your own renderers</a></li>
+<li><a href="#use-sfdy-as-a-library">Use <code>sfdy</code> as a library</a></li>
+</ol>
+<h3 id="retrieve-full-metadata">Retrieve full metadata</h3>
+<p>From the root folder of your salesforce project, type:</p>
+<pre><code>$ sfdy retrieve -u USERNAME -p PASSWORD -s
+</code></pre>
+<p>This command will retrieve all metadata specified in package.xml and will apply any enabled patch.</p>
+<p>The <code>-s</code> flag should be used when connecting to a sandbox.</p>
+<h3 id="retrieve-partial-metadata">Retrieve partial metadata</h3>
+<h4 id="using---files">using --files</h4>
+<pre><code>$ sfdy retrieve -u USERNAME -p PASSWORD -s --files=&#x27;objects/*,!objects/Account*,site*/**/*&#x27;
+</code></pre>
+<p>This command will retrieve all objects present in the local <code>objects</code> folder, except those which name starts with <code>Account</code>, and will retrieve all metadata (present in the local project) which folder starts with <code>site</code> (for example <code>sites</code>, <code>siteDotCom</code>)</p>
+<p>The --files consists in a comma-separated list of <a href="https://www.npmjs.com/package/globby">glob patterns</a></p>
+<h4 id="using---meta">using --meta</h4>
+<pre><code>$ sfdy retrieve -u USERNAME -p PASSWORD -s --meta=&#x27;CustomObject/Account,FlexiPage/*&#x27;
+</code></pre>
+<p>This command will retrieve the Account object and all the flexipages present on the target salesforce environment</p>
+<blockquote>
+<p><strong>Warning:</strong> the --meta option builds an ad-hoc package.xml to retrieve the data. Glob patterns cannot be used in this case. You can use a wildcard only if that metadata type supports it</p>
+</blockquote>
+<h3 id="deploy-full-metadata">Deploy full metadata</h3>
+<pre><code>$ sfdy deploy -u USERNAME -p PASSWORD -s
+</code></pre>
+<p>This command will apply any enabled pre-deploy patch and will deploy all metadata specified in package.xml.</p>
+<p>The <code>-s</code> flag should be used when connecting to a sandbox.</p>
+<h3 id="deploy-partial-metadata">Deploy partial metadata</h3>
+<h4 id="using---files-1">using --files</h4>
+<pre><code>$ sfdy deploy -u USERNAME -p PASSWORD -s --files=&#x27;objects/*,!objects/Account*,site*/**/*&#x27;
+</code></pre>
+<p>This command will deploy all objects present in the local <code>objects</code> folder, except those which name starts with <code>Account</code>, and will deploy all metadata (present in the local project) which folder starts with <code>site</code> (for example <code>sites</code>, <code>siteDotCom</code>)</p>
+<p>The --files consists in a comma-separated list of <a href="https://www.npmjs.com/package/globby">glob patterns</a></p>
+<h4 id="using---diff">using --diff</h4>
+<pre><code>$ sfdy deploy -u USERNAME -p PASSWORD -s --diff=&#x27;behindBranch..aheadBranch&#x27;
+</code></pre>
+<p>The <code>--diff</code> flag is used to compute the list of files that needs to be deployed comparing 2 git branches. (examples: <code>--diff=&#39;origin/myBranch..HEAD&#39;</code> or <code>--diff=&#39;branch1..branch2</code>). As an example of use case, you can trigger a deploy to the DEV environment when you create a pull-request to the dev branch. The deploy will contain only the files that have been modified in the pull-request</p>
+<blockquote>
+<p><strong>Warning:</strong> the --diff option requires git. To use this feature you should be versioning your Salesforce project</p>
+</blockquote>
+<h3 id="deploy-a-destructive-changeset">Deploy a destructive changeset</h3>
+<p>Just run a <a href="#deploy-partial-metadata">partial deploy</a> passing the <code>--destructive</code> flag</p>
+<pre><code>$ sfdy deploy -u USERNAME -p PASSWORD -s --files=&#x27;objects/*,!objects/Account*,site*/**/*&#x27; --destructive
+</code></pre>
+<p>You can also run a destructive deploy changeset with a custom destructiveChanges.xml path:</p>
+<pre><code>$ sfdy deploy -u USERNAME -p PASSWORD -s --destructive &lt;destructiveChanges.xml path&gt;
+</code></pre>
+<blockquote>
+<p><strong>Warning:</strong> Full destructive deploy is deliberately not supported</p>
+</blockquote>
+<blockquote>
+<p><strong>Warning:</strong> This command deletes the metadata files from Salesforce, but they remain on the filesystem</p>
+</blockquote>
+<h3 id="apply-standard-patches-and-renderers-to-metadata">Apply &#39;standard&#39; patches and renderers to metadata</h3>
+<p>Sfdy provides a number of ready-to-use patches that you may find useful.
+All these patches serve 2 purposes:</p>
+<ol>
+<li><strong>Remove useless metadata</strong> (not translated fields, useless FLS in permission sets, roles that are automatically managed by salesforce, profile permissions in standard profiles, stuff created by managed packages at installation time)</li>
+<li><strong>Add useful metadata</strong>. We want our repo to really be the &#39;source of truth&#39; (ALL profile permissions, not only the enabled ones. ALL object permissions. Profile configuration of objects/applications/tabs that we DON&#39;T want to version because they&#39;re not used or we&#39;re not the mantainer of those metadata)</li>
+</ol>
+<p>All of these patches can be disabled, so you can incrementally adopt them or skip a specific patch if you don&#39;t find it useful.</p>
+<p>In addition to metadata patching, <code>sfdy</code> provides an out-of-the-box renderer to handle static resource bundles.</p>
+<p>First of all, create the configuration file <code>.sfdy.json</code> in the root folder of the salesforce project:</p>
+<pre><code>$ sfdy init
+</code></pre>
+<p>The configuration file is a JSON object:</p>
+<pre><code class="language-json">{
+  <span class="hljs-attr">&quot;permissionSets&quot;</span>: {
+    <span class="hljs-attr">&quot;stripUselessFls&quot;</span>: <span class="hljs-literal">true</span>
+  },
+  <span class="hljs-attr">&quot;objectTranslations&quot;</span>: {
+    <span class="hljs-attr">&quot;stripUntranslatedFields&quot;</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">&quot;stripNotVersionedFields&quot;</span>: <span class="hljs-literal">true</span>
+  },
+  <span class="hljs-attr">&quot;preDeployPlugins&quot;</span>: [],
+  <span class="hljs-attr">&quot;postRetrievePlugins&quot;</span>: [],
+  <span class="hljs-attr">&quot;renderers&quot;</span>: [],
+  <span class="hljs-attr">&quot;profiles&quot;</span>: {
+    <span class="hljs-attr">&quot;addAllUserPermissions&quot;</span>: <span class="hljs-literal">false</span>,
+    <span class="hljs-attr">&quot;addDisabledVersionedObjects&quot;</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">&quot;addExtraObjects&quot;</span>: [<span class="hljs-string">&quot;*&quot;</span>, <span class="hljs-string">&quot;!*__?&quot;</span>, <span class="hljs-string">&quot;!CommSubscription*&quot;</span>],
+    <span class="hljs-attr">&quot;addExtraTabVisibility&quot;</span>: [<span class="hljs-string">&quot;standard-*&quot;</span>],
+    <span class="hljs-attr">&quot;addExtraApplications&quot;</span>: [<span class="hljs-string">&quot;standard__*&quot;</span>],
+    <span class="hljs-attr">&quot;stripUserPermissionsFromStandardProfiles&quot;</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">&quot;stripUnversionedStuff&quot;</span>: <span class="hljs-literal">true</span>
+  },
+  <span class="hljs-attr">&quot;roles&quot;</span>: {
+    <span class="hljs-attr">&quot;stripPartnerRoles&quot;</span>: <span class="hljs-literal">true</span>
+  },
+  <span class="hljs-attr">&quot;staticResources&quot;</span>: {
+    <span class="hljs-attr">&quot;useBundleRenderer&quot;</span>: [<span class="hljs-string">&quot;*.resource&quot;</span>]
+  },
+  <span class="hljs-attr">&quot;stripManagedPackageFields&quot;</span>: [<span class="hljs-string">&quot;et4ae5&quot;</span>]
+}
+</code></pre>
+<h4 id="permissionsets">permissionSets</h4>
+<table>
+<thead>
+<tr>
+<th>Patch</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>stripUselessFls</td>
+<td>if <code>stripUselessFls</code> is <code>true</code>, <code>fieldPermissions</code> in which both <code>readable</code> and <code>editable</code> tags are <code>false</code> are removed from the XML. They are totally redundand since a <code>PermissionSet</code> can only add permissions.</td>
+</tr>
+</tbody></table>
+<h4 id="objecttranslations">objectTranslations</h4>
+<table>
+<thead>
+<tr>
+<th>Patch</th>
+<th>Metadata</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>stripUntranslatedFields</td>
+<td>Translations, CustomObjectTranslation, GlobalValueSetTranslation, StandardValueSetTranslation</td>
+<td>if <code>stripUntranslatedFields</code> is <code>true</code>, untranslated tags are removed from the XML.</td>
+</tr>
+<tr>
+<td>stripNotVersionedFields</td>
+<td>CustomObjectTranslation</td>
+<td>if <code>stripNotVersionedFields</code> is <code>true</code>, translated fields that are not present in the file system in the corresponding <code>.object</code> files, are removed from the XML.</td>
+</tr>
+</tbody></table>
+<h4 id="profiles">profiles</h4>
+<table>
+<thead>
+<tr>
+<th>Patch</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>addAllUserPermissions</td>
+<td>Salesforce does not retrieve disabled <code>userPermissions</code>. If <code>addAllUserPermissions</code> is <code>true</code>, all permissions are retrieved</td>
+</tr>
+<tr>
+<td>addDisabledVersionedObjects</td>
+<td>Salesforce does not retrieve totally disabled objects. If <code>addDisabledVersionedObjects</code> is <code>true</code>, sfdy retrieves also <code>objectsPermissions</code> of objects that are present in the file system (and of course tracked by version control systems)) but are disabled for the profile</td>
+</tr>
+<tr>
+<td>addExtraObjects</td>
+<td>Sometimes you want to explicitly configure the access level to some objects even if you&#39;re not interested in versioning the whole object metadata. Now you can. <code>addExtraObjects</code> is an array of glob patterns of the objects of which <code>objectPermissions</code> you want to add to the profile (the glob patterns match against the <code>&lt;member&gt;</code> content in <code>package.xml</code>)</td>
+</tr>
+<tr>
+<td>addExtraTabVisibility</td>
+<td>Sometimes you want to explicitly set the <code>TabVisibility</code> of some tabs even if you&#39;re not interested in versioning the object/tab metadata. Now you can. <code>addExtraTabVisibility</code> is an array of glob patterns of the tabs whose <code>tabVisibilities</code> you want to add to the profile (the glob patterns match against the <code>&lt;member&gt;</code> content in <code>package.xml</code>)</td>
+</tr>
+<tr>
+<td>stripUserPermissionsFromStandardProfiles</td>
+<td>User Permissions are not editable in standard profiles, and they change almost every Salesforce release causing errors that can be avoided. Set this flag to <code>true</code> to automatically remove them</td>
+</tr>
+<tr>
+<td>stripUnversionedStuff</td>
+<td>This flag &#39;sanitizes&#39; the profiles, removing <code>fieldPermissions</code>, <code>classAccesses</code>, <code>pageAccesses</code>, <code>layoutAssignments</code> that are not related to stuff tracked under version control. I can&#39;t really see any reason not to enable this option, that can help avoiding errors made by developers during code/metadata versioning</td>
+</tr>
+</tbody></table>
+<h4 id="roles">roles</h4>
+<table>
+<thead>
+<tr>
+<th>Patch</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>stripPartnerRoles</td>
+<td>if <code>stripPartnerRoles</code> is <code>true</code>, roles that end with <code>PartnerUser[0-9]*.role</code> are removed even if a <code>*</code> is used in <code>package.xml</code>. They are automatically created by Salesforce when you create a Partner Account, so there&#39;s no need to track them them using version control</td>
+</tr>
+</tbody></table>
+<h4 id="staticresources">staticResources</h4>
+<table>
+<thead>
+<tr>
+<th>Renderer</th>
+<th>Metadata</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>useBundleRenderer</td>
+<td>StaticResource</td>
+<td>glob pattern to identify static resource files to handle as an uncompressed bundle. The <code>contentType</code> of the <code>.resource-meta.xml</code> file must be <code>application/zip</code>. This renderer retrieves directly the uncompressed folder instead of the <code>.resource</code> file. If you deploy a single file inside the bundle, the <code>.resource</code> file is rebuilded behind the scenes and deployed in place of the single specified file</td>
+</tr>
+</tbody></table>
+<h4 id="other">other</h4>
+<table>
+<thead>
+<tr>
+<th>Patch</th>
+<th>Metadata</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>stripManagedPackageFields</td>
+<td>CustomObject, PermissionSet, Profile</td>
+<td>Array of namespaces of stuff created by managed packages (eg Marketing Cloud) that we don&#39;t want to track changes using Version Control. This plugin removes <code>fields</code>, <code>picklistValues</code>, <code>weblinks</code> from <code>CustomObject</code> and <code>fieldPermissions</code> from <code>Profile</code> and <code>PermisissionSet</code></td>
+</tr>
+</tbody></table>
+<h3 id="build-your-own-plugins">Build your own plugins</h3>
+<p><code>sfdy</code> offers a convenient way to develop your own plugins. This is really useful in many cases. A simple  use case may be changing named credential&#39;s endpoints or email addresses in workflow&#39;s email alerts based on the target org, but the possibilities are endless. You can even query salesforce (rest api or tooling api) to conditionally apply transformations to the metadata on the basis of information coming from the target org.</p>
+<p>All the standard plugins are built using the plugin engine of <code>sfdy</code>, so the best reference to understand how to develop a custom plugin is to look at the <a href="https://https://github.com/micheletriaca/sfdy/tree/master/src/plugins">plugins</a> folder in which all the standard plugins reside.</p>
+<p>A plugin is a <code>.js</code> module that exports a function with this signature:</p>
+<pre><code class="language-javascript"><span class="hljs-built_in">module</span>.exports = <span class="hljs-keyword">async</span> (context, helpers, utils) =&gt; {
+  <span class="hljs-comment">//TODO -&gt; Plugin implementation</span>
+}
+</code></pre>
+<h4 id="context"><code>context</code></h4>
+<ul>
+<li><code>sfdcConnector</code> - an instance of a Salesforce connector. It exposes 2 methods, <code>query</code> and <code>rest</code></li>
+<li><code>environment</code> - The value of the environment variable <code>environment</code>. It can be used to execute different patches in different sandboxes</li>
+<li><code>username</code> - The username used to login</li>
+<li><code>log</code> - A <code>log</code> function that should be used instead of <code>console.log</code> if you want to log something. The reason is that, when used as a library, <code>sfdy</code> can accept a custom logger implementation. When used as a command line tool, the <code>log</code> function fallbacks to <code>console.log</code></li>
+<li><code>pkg</code> - A json representation of the <code>package.xml</code></li>
+<li><code>config</code> - The content of <code>.sfdy.json</code> (as a JSON object)</li>
+</ul>
+<h4 id="helpers"><code>helpers</code></h4>
+<ul>
+<li><code>xmlTransformer (pattern, callback1)</code> - This helper allows the developer to easily transform one or more metadata (identified by <code>pattern</code>), using a <code>callback</code> function. See <a href="#examples">examples</a> to understand how to use it</li>
+<li><code>modifyRawContent (pattern, callback2)</code> - This helper allows the developer to manipulate the whole metadata file. It is useful if you want to edit a file that is not an xml, or if you want to apply drastic transformations</li>
+<li><code>filterMetadata (filterFn)</code> - This helper can be used in a post-retrieve plugin to filter out unwanted metadata</li>
+<li><code>requireMetadata (pattern, callback3)</code> - This helper can be used to define dependencies between metadata. For example, a <code>Profile</code> must be retrieved together with <code>CustomObject</code> metadata in order to retrieve the list of <code>fieldPermissions</code>. By defining such a dependency using <code>requireMetadata</code>, whenever you retrieve a <code>Profile</code>, all dependent metadata are automatically included in the <code>package.xml</code> and eventually discarded at the end of the retrieve operation, just to retrieve all the relted parts of the original metadata you wanted to retrieve</li>
+<li><code>addRemapper (regex, callback4)</code> - This helper can be used to map an arbitrary file to a file representing a Salesforce metadata. For example, it can be used to instruct <code>sfdy</code> to deploy/retrieve a <code>.resource</code> file when you deploy/retrieve a file inside an uncompressed bundle. <code>regex</code> is a <code>RegExp</code> object defining the matching patterns</li>
+</ul>
+<h5 id="callback1-filename-fjson-requirefiles-addfiles-cleanfiles"><code>callback1 (filename, fJson, requireFiles, addFiles, cleanFiles)</code>:</h5>
+<ul>
+<li><code>filename</code> - The current filename</li>
+<li><code>fJson</code>  -  JSON representation of the XML. You can modify the object to modify the XML</li>
+<li><code>requireFiles (filenames: string[]): Promise&lt;Entry[]&gt;</code> - An async function taking an array of glob patterns and returning an array of <code>{ fileName: string, data: Buffer }</code> objects representing files. The files are taken from memory if you are requiring files that you are retrieving/deploying, otherwise they are searched in the filesystem. These files will be added to the files that will be retrieved/deployed unless you specify a filter with the <code>filterMetadata</code> helper. This helper is useful when you want to act on a metadata on the basis on another one (for example you need to retrieve the versioned fields from a <code>.object</code> file to add/delete FLS from <code>profiles</code>).</li>
+<li><code>addFiles (entries: Entry[])</code> - A function taking an array of <code>{ fileName: string, data: Buffer }</code> objects representing files. This function is similar to <code>requireFiles</code>. The main difference is that <code>requireFiles</code> looks for existing files, while <code>addFiles</code> let you add arbitrary data to the retrieved/deployed files. For this reason, it is best suited to be used in a <code>renderer</code></li>
+<li><code>cleanFiles (filenames: string[])</code> - A function taking an array of glob patterns. This function let you specify files that should be deleted. It should be used in the context of an after retrieve plugin or a transform renderer (for example it is used to clean up an uncompressed staticresource bundle before uncompressing the <code>.resource</code> file coming from Salesforce)</li>
+</ul>
+<h5 id="callback2-filename-file-requirefiles-addfiles-cleanfiles"><code>callback2 (filename, file, requireFiles, addFiles, cleanFiles)</code>:</h5>
+<ul>
+<li><code>filename</code> - The current filename</li>
+<li><code>file</code> is an object containing a <code>data</code> field. <code>data</code> is a buffer containing the whole file. You can modify <code>data</code> to modify the file</li>
+<li><code>requireFiles (filenames: string[]): Promise&lt;Entry[]&gt;</code> - See <a href="#callback1-filename-fjson-requirefiles-addfiles-cleanfiles">callback1</a></li>
+<li><code>addFiles (entries: Entry[])</code> - See <a href="#callback1-filename-fjson-requirefiles-addfiles-cleanfiles">callback1</a></li>
+<li><code>cleanFiles (filenames: string[])</code> - See <a href="#callback1-filename-fjson-requirefiles-addfiles-cleanfiles">callback1</a></li>
+</ul>
+<h5 id="filterfn-filename"><code>filterFn (filename)</code>:</h5>
+<ul>
+<li><code>filename: string</code> - The current filename, including the path (for example <code>classes/MyClass.cls</code>)</li>
+</ul>
+<h5 id="callback3--filterpackage-requirepackage-"><code>callback3 ({ filterPackage, requirePackage })</code>:</h5>
+<ul>
+<li><p><code>filterPackage (arrayOfMetadata: string[])</code> - A function taking an array of metadata that should be included together with metadata matched by <code>pattern</code>. The &#39;companions&#39; will be retrieved only if they are present in the stored <code>package.xml</code>. For example, if you retrieve a profile, the profile will be retrieved together with the referenced <code>CustomObject</code></p>
+</li>
+<li><p><code>requirePackage (arrayOfMetadata: string[])</code> - The same as <code>filterPackage</code>, but the included metadata will be added to <code>package.xml</code> whether they were present before or not. In this case <code>arrayOfMetadata</code> is an array of &#39;pseudo&#39; glob patterns (ex. <code>[&#39;CustomApplication/*&#39;, &#39;CustomObject/Account&#39;]</code>)</p>
+</li>
+</ul>
+<h5 id="callback4-filename-regexp-string"><code>callback4 (fileName, regexp): string</code>:</h5>
+<ul>
+<li><code>fileName: string</code> - The current filename, including the path (for example <code>classes/MyClass.cls</code>)</li>
+<li><code>regexp: RegExp</code> - The regexp originally passed to the helper</li>
+<li>return value: a string representing the mapped filename</li>
+</ul>
+<h3 id="utils--parsexml-buildxml-parsexmlnoarray-">utils <code>{ parseXml, buildXml, parseXmlNoArray }</code></h3>
+<p>Helpers function. See <a href="https://https://github.com/micheletriaca/sfdy/tree/master/src/utils/xml-utils.js">here</a></p>
+<p>To instruct <code>sfdy</code> to use your plugin, you have to configure the path of your plugin in the <code>.sfdy.json</code> file:</p>
+<pre><code class="language-json">{
+  <span class="hljs-attr">&quot;preDeployPlugins&quot;</span>: [<span class="hljs-string">&quot;sfdy-plugins/my-awesome-plugin.js&quot;</span>],
+  <span class="hljs-attr">&quot;postRetrievePlugins&quot;</span>: [<span class="hljs-string">&quot;sfdy-plugins/my-wonderful-plugin.js&quot;</span>]
+}
+</code></pre>
+<p>You have 2 different &#39;hooks&#39; to choose from:</p>
+<ul>
+<li><code>postRetrievePlugins</code> are executed just before the metadata retrieved from Salesforce is stored on the filesystem</li>
+<li><code>preDeployPlugins</code> are executed before deploying metadata to Salesforce</li>
+</ul>
+<h4 id="examples">Examples</h4>
+<h5 id="change-the-endpoint-of-a-named-credential-better-suited-as-a-predeployplugin">Change the endpoint of a named credential (better suited as a <code>preDeployPlugin</code>)</h5>
+<pre><code class="language-javascript"><span class="hljs-built_in">module</span>.exports = <span class="hljs-keyword">async</span> ({ environment, log }, helpers) =&gt; {
+  helpers.xmlTransformer(<span class="hljs-string">&#x27;namedCredentials/*&#x27;</span>, <span class="hljs-keyword">async</span> (filename, fJson) =&gt; {
+    log(<span class="hljs-string">`Patching <span class="hljs-subst">${filename}</span>...`</span>)
+    <span class="hljs-keyword">if</span>(filename === <span class="hljs-string">&#x27;idontwanttochangethis.NamedCredential&#x27;</span>) <span class="hljs-keyword">return</span>
+
+    <span class="hljs-keyword">switch</span>(environment) {
+      <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;uat&#x27;</span>:
+        fJson.endpoint = <span class="hljs-string">&#x27;https://uat-endpoint.com/restservice&#x27;</span>
+        <span class="hljs-keyword">break</span>
+      <span class="hljs-keyword">case</span> <span class="hljs-string">&#x27;prod&#x27;</span>:
+        fJson.endpoint = <span class="hljs-string">&#x27;https://prod-endpoint.com/restservice&#x27;</span>
+        <span class="hljs-keyword">break</span>
+      <span class="hljs-attr">default</span>:
+        fJson.endpoint = <span class="hljs-string">&#x27;https://test-endpoint.com/restservice&#x27;</span>
+        <span class="hljs-keyword">break</span>
+
+      log(<span class="hljs-string">&#x27;Done&#x27;</span>)
+    }
+  })
+}
+</code></pre>
+<h5 id="remove-every-field-and-every-apex-class-that-starts-with-test_-better-suited-as-a-postretrieveplugin">Remove every field and every apex class that starts with <code>Test_</code> (better suited as a <code>postRetrievePlugin</code>)</h5>
+<pre><code class="language-javascript"><span class="hljs-built_in">module</span>.exports = <span class="hljs-keyword">async</span> ({ environment, log }, helpers) =&gt; {
+  helpers.xmlTransformer(<span class="hljs-string">&#x27;objects/*&#x27;</span>, <span class="hljs-keyword">async</span> (filename, fJson) =&gt; {
+    log(<span class="hljs-string">`Patching <span class="hljs-subst">${filename}</span>...`</span>)
+    fJson.fields = (fJson.fields || []).filter(<span class="hljs-function"><span class="hljs-params">field</span> =&gt;</span> !field.FullName[<span class="hljs-number">0</span>].startsWith(<span class="hljs-string">&#x27;Test_&#x27;</span>))
+    log(<span class="hljs-string">&#x27;Done&#x27;</span>)
+  })
+
+  helpers.filterMetadata(<span class="hljs-function"><span class="hljs-params">fileName</span> =&gt;</span> !<span class="hljs-regexp">/classes\/Test_[^\/]+\.cls$/</span>.test(fileName))
+}
+</code></pre>
+<blockquote>
+<p><strong>Warning:</strong> fJson contains the json representation of the metadata file. The root tag of the metadata is omitted for convenience. Every tag is treated as an array</p>
+</blockquote>
+<blockquote>
+<p><strong>Warning:</strong> The callback function ot the <code>xmlTransformer</code> helper MUST return a <code>Promise</code></p>
+</blockquote>
+<h5 id="query-salesforce-to-apply-advanced-transformations">Query Salesforce to apply advanced transformations</h5>
+<p>See <a href="https://https://github.com/micheletriaca/sfdy/tree/master/src/plugins/profile-plugins/add-all-permissions-to-custom-profiles.js">this</a></p>
+<h5 id="define-dependencies-between-metadata">Define dependencies between metadata</h5>
+<p>See <a href="https://https://github.com/micheletriaca/sfdy/tree/master/src/plugins/dependency-graph.js">this</a></p>
+<h3 id="build-your-own-renderers">Build your own renderers</h3>
+<p>A renderer is a <code>.js</code> file that exports an object with this signature:</p>
+<pre><code class="language-javascript"><span class="hljs-built_in">module</span>.exports = {
+  <span class="hljs-attr">transform</span>: <span class="hljs-keyword">async</span> (context, helpers, utils) =&gt; {
+    <span class="hljs-comment">//TODO -&gt; Transform</span>
+  },
+  <span class="hljs-attr">untransform</span>: <span class="hljs-keyword">async</span> (context, helpers, utils) =&gt; {
+    <span class="hljs-comment">//TODO -&gt; Untransform</span>
+  }
+}
+</code></pre>
+<p>The <code>transform</code> function is applied after the retrieve operation and after the execution of the post-retrieve plugins. The <code>untransform</code> function is applied as soon as you start a deploy, before the application of the pre deploy plugins and the actual deploy.</p>
+<p>A renderer can be used to totally transform the metadata in the format you like. For example, you could think to split a <code>.object</code> file in different files, one for <code>fields</code> and one per <code>recordtypes</code>, or to even convert everything in json, or to represent some information as a <code>.csv</code> file. You can do what best fit your needs.</p>
+<p>To instruct <code>sfdy</code> to use your renderer, you have to configure the path of your renderer in the <code>.sfdy.json</code> file:</p>
+<pre><code class="language-json">{
+  <span class="hljs-attr">&quot;renderers&quot;</span>: [<span class="hljs-string">&quot;sfdy-plugins/my-awesome-renderer.js&quot;</span>]
+}
+</code></pre>
+<blockquote>
+<p><strong>Tip:</strong> You do not have to include the renderer whithin your salesforce project to be able to use it, so you can use your plugin referencing it from all of your project workspaces!</p>
+</blockquote>
+<h4 id="example---store-profiles-as-json-files">Example - Store profiles as json files</h4>
+<pre><code class="language-js"><span class="hljs-built_in">module</span>.exports = {
+  <span class="hljs-attr">transform</span>: <span class="hljs-keyword">async</span> (context, helpers, { parseXmlNoArray }) =&gt; {
+    helpers.modifyRawContent(<span class="hljs-string">&#x27;profiles/*&#x27;</span>, <span class="hljs-keyword">async</span> (filename, file) =&gt; {
+      <span class="hljs-keyword">const</span> fJson = <span class="hljs-keyword">await</span> parseXmlNoArray(file.data)
+      file.data = Buffer.from(<span class="hljs-built_in">JSON</span>.stringify(fJson, <span class="hljs-literal">null</span>, <span class="hljs-number">2</span>), <span class="hljs-string">&#x27;utf8&#x27;</span>)
+    })
+  },
+  <span class="hljs-attr">untransform</span>: <span class="hljs-keyword">async</span> (context, helpers, { buildXml }) =&gt; {
+    helpers.modifyRawContent(<span class="hljs-string">&#x27;profiles/*&#x27;</span>, <span class="hljs-keyword">async</span> (filename, file) =&gt; {
+      <span class="hljs-keyword">const</span> fJson = <span class="hljs-built_in">JSON</span>.parse(file.data.toString())
+      file.data = Buffer.from(buildXml(fJson), <span class="hljs-string">&#x27;utf8&#x27;</span>)
+    })
+  }
+}
+</code></pre>
+<h4 id="example---handle-zip-staticresources-as-uncompressed-folders">Example - Handle zip staticresources as uncompressed folders</h4>
+<p>See <a href="https://https://github.com/micheletriaca/sfdy/tree/master/src/renderers/static-resource-bundle.js">here</a></p>
+<h3 id="use-sfdy-as-a-library">Use <code>sfdy</code> as a library</h3>
+<p>It&#39;s as simple as that:</p>
+<pre><code>$ npm i sfdy
+</code></pre>
+<h4 id="retrieve">retrieve</h4>
+<pre><code class="language-js"><span class="hljs-keyword">const</span> retrieve = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;sfdy/src/retrieve&#x27;</span>)
+
+retrieve({
+  <span class="hljs-attr">basePath</span>: <span class="hljs-string">&#x27;root/folder&#x27;</span>,
+  <span class="hljs-attr">config</span>: {
+    <span class="hljs-comment">//.sfdy.json like config</span>
+  },
+  <span class="hljs-attr">files</span>: [ <span class="hljs-comment">/*specific files*/</span> ],
+  <span class="hljs-attr">loginOpts</span>: {
+    <span class="hljs-attr">serverUrl</span>: creds.url,
+    <span class="hljs-attr">username</span>: creds.username,
+    <span class="hljs-attr">password</span>: creds.password
+  },
+  <span class="hljs-attr">meta</span>: [<span class="hljs-comment">/*specific meta*/</span>]
+  <span class="hljs-attr">logger</span>: <span class="hljs-function">(<span class="hljs-params">msg: string</span>) =&gt;</span> logger.appendLine(msg)
+}).then(<span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">&#x27;Done!&#x27;</span>))
+</code></pre>
+<h4 id="deploy">deploy</h4>
+<pre><code class="language-js"><span class="hljs-keyword">const</span> deploy = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;sfdy/src/deploy&#x27;</span>)
+
+deploy({
+  <span class="hljs-attr">logger</span>: <span class="hljs-function">(<span class="hljs-params">msg: string</span>) =&gt;</span> logger.appendLine(msg),
+  preDeployPlugins,
+  renderers,
+  <span class="hljs-attr">basePath</span>: <span class="hljs-string">&#x27;root/folder&#x27;</span>,
+  <span class="hljs-attr">loginOpts</span>: {
+    <span class="hljs-attr">serverUrl</span>: creds.url,
+    <span class="hljs-attr">username</span>: creds.username,
+    <span class="hljs-attr">password</span>: creds.password
+  },
+  checkOnly,
+  <span class="hljs-attr">files</span>: [<span class="hljs-string">&#x27;specific&#x27;</span>, <span class="hljs-string">&#x27;files&#x27;</span>]
+}).then(<span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">console</span>.log(<span class="hljs-string">&#x27;Done!&#x27;</span>))
+</code></pre>
+<h2 id="changelog">Changelog</h2>
+<ul>
+<li><p>1.4.6</p>
+<ul>
+<li>Bugfixing: fix regression handling folders in foldered metadata</li>
+</ul>
+</li>
+<li><p>1.4.5</p>
+<ul>
+<li>Bugfixing: solved &#39;multiple metadata types in same folder&#39; issue. It is now possible to retrieve and deploy correctly wave metadata</li>
+</ul>
+</li>
+<li><p>1.4.4</p>
+<ul>
+<li>Destructive changeset: added the possibility to pass both a <code>package.xml</code> or a glob pattern. See <a href="#deploy-a-destructive-changeset">here</a>. Thanks <a href="https://github.com/zerbfra">zerbfra</a></li>
+<li>Bugfixing: fixed crash when <code>--diff</code> returned only files outside src folder</li>
+</ul>
+</li>
+<li><p>1.4.3</p>
+<ul>
+<li>Bugfixing: fixed exclusion glob pattern when using <code>--files</code> option</li>
+</ul>
+</li>
+<li><p>1.4.2</p>
+<ul>
+<li>Bugfixing: fixed issue when deploying ExperienceBundle</li>
+</ul>
+</li>
+<li><p>1.4.1</p>
+<ul>
+<li>Bugfixing: fixed issue when deploying with --diff a report in a nested folder</li>
+</ul>
+</li>
+<li><p>1.4.0</p>
+<ul>
+<li>Transformer api. Api to load unrendered files in memory</li>
+</ul>
+</li>
+<li><p>1.3.6</p>
+<ul>
+<li>Bugfixing: <code>--diff</code> and <code>--files</code> flag can be used together</li>
+</ul>
+</li>
+<li><p>1.3.5</p>
+<ul>
+<li>Bugfixing: <a href="https://github.com/micheletriaca/sfdy/issues/8">Handle --diff that find no diff in src foldes</a></li>
+</ul>
+</li>
+<li><p>1.3.4</p>
+<ul>
+<li>Bugfixing: <a href="https://github.com/micheletriaca/sfdy/issues/10">Delta deploy of foldered metadata (Report, Document, Email, Dashboard) fails</a></li>
+<li>Minor Bugfixing</li>
+</ul>
+</li>
+<li><p>1.3.3</p>
+<ul>
+<li>Bugfixing</li>
+<li><code>--files</code> option: now you can pass specific file paths (not glob patterns) even if the files are not present in the filesystem</li>
+</ul>
+</li>
+<li><p>1.3.2</p>
+<ul>
+<li>README.md fixes</li>
+<li>Static resource bundle renderer cleans <code>.resource</code> file when active, and the uncompressed folder when inactive</li>
+</ul>
+</li>
+<li><p>1.3.1</p>
+<ul>
+<li>README.md fixes</li>
+</ul>
+</li>
+<li><p>1.3.0</p>
+<ul>
+<li>Added <code>addRemapper</code> helper function</li>
+<li>Added <code>addFiles</code>, <code>cleanFiles</code> utility functions to plugin helpers. (See <a href="#callback1-filename-fjson-requirefiles-addfiles-cleanfiles">here</a>)</li>
+<li>Static resource bundle <a href="#apply-standard-patches-and-renderers-to-metadata">renderer</a></li>
+</ul>
+</li>
+<li><p>1.2.0</p>
+<ul>
+<li><a href="#deploy-a-destructive-changeset">destructive changesets</a> support</li>
+<li><code>README.md</code> improvements. Thanks <a href="https://github.com/tr4uma">tr4uma</a></li>
+</ul>
+</li>
+<li><p>1.1.0</p>
+<ul>
+<li>First release</li>
+</ul>
+</li>
+</ul>
+</article>
+
+</section>
+    <footer class="bg-brand text-gray-100 p-2 text-xs text-center">© 2021 - Michele Triaca. Built with <a target="_blank" href="https://kit.svelte.dev/">Svelte Kit</a></footer></div></div>
+
+
+
+
+
+	<script type="svelte-data" url="/blog/sfdy-copy-2.json">{"status":200,"statusText":"","headers":{"content-type":"application/json"},"body":"{\"title\":\"Sfdy copy 2\",\"publishedDate\":\"2021-01-01T00:00:00.000Z\",\"abstract\":\"sfdy is a command line tool to work with the Salesforce Metadata API. It has been built to work around strange behaviours and known limitations of the api, and to simplify the implementation of a continuous integration process\",\"body\":\"\u003Cp\u003Esfdy is a command line tool to work with the \u003Ca href=\\\"https:\u002F\u002Fdeveloper.salesforce.com\u002Fdocs\u002Fatlas.en-us.api_meta.meta\u002Fapi_meta\u002Fmeta_intro.htm\\\"\u003ESalesforce Metadata API\u003C\u002Fa\u003E.\\nIt has been built to work around strange behaviours and known limitations of the api, and to simplify the implementation of a continuous integration process. It applies \u003Ca href=\\\"#apply-standard-patches-and-renderers-to-metadata\\\"\u003Euseful patches\u003C\u002Fa\u003E to avoid common problems when deploying metadata, and it exposes a simple interface to \u003Ca href=\\\"#build-your-own-plugins\\\"\u003Ebuild your own plugins\u003C\u002Fa\u003E\u003C\u002Fp\u003E\\n\u003Col\u003E\\n\u003Cli\u003E\u003Ca href=\\\"#requirements\\\"\u003ERequirements\u003C\u002Fa\u003E\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ca href=\\\"#usage\\\"\u003EUsage\u003C\u002Fa\u003E\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ca href=\\\"#why-not-sfdx\\\"\u003EWhy not SFDX?\u003C\u002Fa\u003E\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ca href=\\\"#installation\\\"\u003EInstallation\u003C\u002Fa\u003E\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ca href=\\\"#features\\\"\u003EFeatures\u003C\u002Fa\u003E\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ca href=\\\"#changelog\\\"\u003EChangelog\u003C\u002Fa\u003E\u003C\u002Fli\u003E\\n\u003C\u002Fol\u003E\\n\u003Ch2 id=\\\"requirements\\\"\u003ERequirements\u003C\u002Fh2\u003E\\n\u003Cul\u003E\\n\u003Cli\u003E\u003Ca href=\\\"https:\u002F\u002Fnodejs.org\u002Fen\u002F\\\"\u003ENode.js\u003C\u002Fa\u003E at least \u003Ccode\u003E10.x.x\u003C\u002Fcode\u003E\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\u003Ch2 id=\\\"usage\\\"\u003EUsage\u003C\u002Fh2\u003E\\n\u003Cp\u003E\u003Ccode\u003Esfdy\u003C\u002Fcode\u003E is meant to be mainly used as a command line tool. It can also be used a library since it exposes a small \u003Ca href=\\\"#use-sfdy-as-a-library\\\"\u003EAPI\u003C\u002Fa\u003E.\u003C\u002Fp\u003E\\n\u003Cp\u003EType \u003Ccode\u003Esfdy --help\u003C\u002Fcode\u003E to see available commands. Type \u003Ccode\u003Esfdy [command] --help\u003C\u002Fcode\u003E to see available options for a specific command\u003C\u002Fp\u003E\\n\u003Ch2 id=\\\"why-not-sfdx\\\"\u003EWhy not SFDX?\u003C\u002Fh2\u003E\\n\u003Cp\u003E\u003Ca href=\\\"https:\u002F\u002Fdeveloper.salesforce.com\u002Ftools\u002Fsfdxcli\\\"\u003ESFDX\u003C\u002Fa\u003E is a tool to work with scratch orgs and with modular projects.\u003C\u002Fp\u003E\\n\u003Cp\u003EIn a typical salesforce project, development starts in a scratch org or in a classic sandbox.\\nEven if you use scratch orgs, however, sooner or later you&#39;ll have to deploy your sfdx project to a classic sandbox (a shared, persistant development sandbox used to test integrations, an UAT sandbox, etc.). After the code is deployed to a classic sandbox, we are right back where we started.\u003C\u002Fp\u003E\\n\u003Cp\u003EMoreover, DX requires the developer to break down their entire Enterprise org into individual projects, but sometimes this is not possible\u002Fadvisable or the sub-projects are still too big to be worked on by a single developer. Salesforce metadata are deeply interconnected, and every module is very likely to use a subset of common functionalities (standard objects, layout, flexipages). It is often a nightmare to divide an enterprise project in modules, because those modules are not really independent from each other.\u003C\u002Fp\u003E\\n\u003Cp\u003EFinally, this tool solves some problems that SFDX does not address, and gives the developer an easy way to customize a Salesforce CI process the way HE\u002FSHE wants. To have the best possible experience, use this tool in conjunction with the vscode plugin \u003Ca href=\\\"https:\u002F\u002Fmarketplace.visualstudio.com\u002Fitems?itemName=m1ck83.fast-sfdc\\\"\u003Efast-sfdc\u003C\u002Fa\u003E. patches and even your custom plugins are automatically applied in both your CI flow and your local development environment!\u003C\u002Fp\u003E\\n\u003Ch2 id=\\\"installation\\\"\u003EInstallation\u003C\u002Fh2\u003E\\n\u003Cpre\u003E\u003Ccode\u003E$ npm install -g sfdy\\n\u003C\u002Fcode\u003E\u003C\u002Fpre\u003E\\n\u003Cp\u003Ethen go to the root folder of a Salesforce project, and type\u003C\u002Fp\u003E\\n\u003Cpre\u003E\u003Ccode\u003E$ sfdy init\\n\u003C\u002Fcode\u003E\u003C\u002Fpre\u003E\\n\u003Cp\u003Ethis command creates a \u003Ccode\u003E.sfdy.json\u003C\u002Fcode\u003E file whithin the root folder of your current workspace with the configuration of the &#39;standard&#39; patches (more on this \u003Ca href=\\\"#apply-standard-patches-and-renderers-to-metadata\\\"\u003Elater\u003C\u002Fa\u003E)\u003C\u002Fp\u003E\\n\u003Ch2 id=\\\"features\\\"\u003EFeatures\u003C\u002Fh2\u003E\\n\u003Col\u003E\\n\u003Cli\u003E\u003Ca href=\\\"#retrieve-full-metadata\\\"\u003ERetrieve full metadata (based on package.xml)\u003C\u002Fa\u003E\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ca href=\\\"#retrieve-partial-metadata\\\"\u003ERetrieve partial metadata (glob pattern or metadata-based)\u003C\u002Fa\u003E\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ca href=\\\"#deploy-full-metadata\\\"\u003EDeploy full metadata (based on package.xml)\u003C\u002Fa\u003E\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ca href=\\\"#deploy-partial-metadata\\\"\u003EDeploy partial metadata (glob pattern or diff between 2 git branches)\u003C\u002Fa\u003E\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ca href=\\\"#deploy-a-destructive-changeset\\\"\u003EDeploy a destructive changeset (glob pattern or metadata-based)\u003C\u002Fa\u003E\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ca href=\\\"#apply-standard-patches-and-renderers-to-metadata\\\"\u003EApply &#39;standard&#39; patches and renderers to metadata\u003C\u002Fa\u003E\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ca href=\\\"#build-your-own-plugins\\\"\u003EBuild your own plugins (pre-deploy and after-retrieve)\u003C\u002Fa\u003E\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ca href=\\\"#build-your-own-renderers\\\"\u003EBuild your own renderers\u003C\u002Fa\u003E\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ca href=\\\"#use-sfdy-as-a-library\\\"\u003EUse \u003Ccode\u003Esfdy\u003C\u002Fcode\u003E as a library\u003C\u002Fa\u003E\u003C\u002Fli\u003E\\n\u003C\u002Fol\u003E\\n\u003Ch3 id=\\\"retrieve-full-metadata\\\"\u003ERetrieve full metadata\u003C\u002Fh3\u003E\\n\u003Cp\u003EFrom the root folder of your salesforce project, type:\u003C\u002Fp\u003E\\n\u003Cpre\u003E\u003Ccode\u003E$ sfdy retrieve -u USERNAME -p PASSWORD -s\\n\u003C\u002Fcode\u003E\u003C\u002Fpre\u003E\\n\u003Cp\u003EThis command will retrieve all metadata specified in package.xml and will apply any enabled patch.\u003C\u002Fp\u003E\\n\u003Cp\u003EThe \u003Ccode\u003E-s\u003C\u002Fcode\u003E flag should be used when connecting to a sandbox.\u003C\u002Fp\u003E\\n\u003Ch3 id=\\\"retrieve-partial-metadata\\\"\u003ERetrieve partial metadata\u003C\u002Fh3\u003E\\n\u003Ch4 id=\\\"using---files\\\"\u003Eusing --files\u003C\u002Fh4\u003E\\n\u003Cpre\u003E\u003Ccode\u003E$ sfdy retrieve -u USERNAME -p PASSWORD -s --files=&#x27;objects\u002F*,!objects\u002FAccount*,site*\u002F**\u002F*&#x27;\\n\u003C\u002Fcode\u003E\u003C\u002Fpre\u003E\\n\u003Cp\u003EThis command will retrieve all objects present in the local \u003Ccode\u003Eobjects\u003C\u002Fcode\u003E folder, except those which name starts with \u003Ccode\u003EAccount\u003C\u002Fcode\u003E, and will retrieve all metadata (present in the local project) which folder starts with \u003Ccode\u003Esite\u003C\u002Fcode\u003E (for example \u003Ccode\u003Esites\u003C\u002Fcode\u003E, \u003Ccode\u003EsiteDotCom\u003C\u002Fcode\u003E)\u003C\u002Fp\u003E\\n\u003Cp\u003EThe --files consists in a comma-separated list of \u003Ca href=\\\"https:\u002F\u002Fwww.npmjs.com\u002Fpackage\u002Fglobby\\\"\u003Eglob patterns\u003C\u002Fa\u003E\u003C\u002Fp\u003E\\n\u003Ch4 id=\\\"using---meta\\\"\u003Eusing --meta\u003C\u002Fh4\u003E\\n\u003Cpre\u003E\u003Ccode\u003E$ sfdy retrieve -u USERNAME -p PASSWORD -s --meta=&#x27;CustomObject\u002FAccount,FlexiPage\u002F*&#x27;\\n\u003C\u002Fcode\u003E\u003C\u002Fpre\u003E\\n\u003Cp\u003EThis command will retrieve the Account object and all the flexipages present on the target salesforce environment\u003C\u002Fp\u003E\\n\u003Cblockquote\u003E\\n\u003Cp\u003E\u003Cstrong\u003EWarning:\u003C\u002Fstrong\u003E the --meta option builds an ad-hoc package.xml to retrieve the data. Glob patterns cannot be used in this case. You can use a wildcard only if that metadata type supports it\u003C\u002Fp\u003E\\n\u003C\u002Fblockquote\u003E\\n\u003Ch3 id=\\\"deploy-full-metadata\\\"\u003EDeploy full metadata\u003C\u002Fh3\u003E\\n\u003Cpre\u003E\u003Ccode\u003E$ sfdy deploy -u USERNAME -p PASSWORD -s\\n\u003C\u002Fcode\u003E\u003C\u002Fpre\u003E\\n\u003Cp\u003EThis command will apply any enabled pre-deploy patch and will deploy all metadata specified in package.xml.\u003C\u002Fp\u003E\\n\u003Cp\u003EThe \u003Ccode\u003E-s\u003C\u002Fcode\u003E flag should be used when connecting to a sandbox.\u003C\u002Fp\u003E\\n\u003Ch3 id=\\\"deploy-partial-metadata\\\"\u003EDeploy partial metadata\u003C\u002Fh3\u003E\\n\u003Ch4 id=\\\"using---files-1\\\"\u003Eusing --files\u003C\u002Fh4\u003E\\n\u003Cpre\u003E\u003Ccode\u003E$ sfdy deploy -u USERNAME -p PASSWORD -s --files=&#x27;objects\u002F*,!objects\u002FAccount*,site*\u002F**\u002F*&#x27;\\n\u003C\u002Fcode\u003E\u003C\u002Fpre\u003E\\n\u003Cp\u003EThis command will deploy all objects present in the local \u003Ccode\u003Eobjects\u003C\u002Fcode\u003E folder, except those which name starts with \u003Ccode\u003EAccount\u003C\u002Fcode\u003E, and will deploy all metadata (present in the local project) which folder starts with \u003Ccode\u003Esite\u003C\u002Fcode\u003E (for example \u003Ccode\u003Esites\u003C\u002Fcode\u003E, \u003Ccode\u003EsiteDotCom\u003C\u002Fcode\u003E)\u003C\u002Fp\u003E\\n\u003Cp\u003EThe --files consists in a comma-separated list of \u003Ca href=\\\"https:\u002F\u002Fwww.npmjs.com\u002Fpackage\u002Fglobby\\\"\u003Eglob patterns\u003C\u002Fa\u003E\u003C\u002Fp\u003E\\n\u003Ch4 id=\\\"using---diff\\\"\u003Eusing --diff\u003C\u002Fh4\u003E\\n\u003Cpre\u003E\u003Ccode\u003E$ sfdy deploy -u USERNAME -p PASSWORD -s --diff=&#x27;behindBranch..aheadBranch&#x27;\\n\u003C\u002Fcode\u003E\u003C\u002Fpre\u003E\\n\u003Cp\u003EThe \u003Ccode\u003E--diff\u003C\u002Fcode\u003E flag is used to compute the list of files that needs to be deployed comparing 2 git branches. (examples: \u003Ccode\u003E--diff=&#39;origin\u002FmyBranch..HEAD&#39;\u003C\u002Fcode\u003E or \u003Ccode\u003E--diff=&#39;branch1..branch2\u003C\u002Fcode\u003E). As an example of use case, you can trigger a deploy to the DEV environment when you create a pull-request to the dev branch. The deploy will contain only the files that have been modified in the pull-request\u003C\u002Fp\u003E\\n\u003Cblockquote\u003E\\n\u003Cp\u003E\u003Cstrong\u003EWarning:\u003C\u002Fstrong\u003E the --diff option requires git. To use this feature you should be versioning your Salesforce project\u003C\u002Fp\u003E\\n\u003C\u002Fblockquote\u003E\\n\u003Ch3 id=\\\"deploy-a-destructive-changeset\\\"\u003EDeploy a destructive changeset\u003C\u002Fh3\u003E\\n\u003Cp\u003EJust run a \u003Ca href=\\\"#deploy-partial-metadata\\\"\u003Epartial deploy\u003C\u002Fa\u003E passing the \u003Ccode\u003E--destructive\u003C\u002Fcode\u003E flag\u003C\u002Fp\u003E\\n\u003Cpre\u003E\u003Ccode\u003E$ sfdy deploy -u USERNAME -p PASSWORD -s --files=&#x27;objects\u002F*,!objects\u002FAccount*,site*\u002F**\u002F*&#x27; --destructive\\n\u003C\u002Fcode\u003E\u003C\u002Fpre\u003E\\n\u003Cp\u003EYou can also run a destructive deploy changeset with a custom destructiveChanges.xml path:\u003C\u002Fp\u003E\\n\u003Cpre\u003E\u003Ccode\u003E$ sfdy deploy -u USERNAME -p PASSWORD -s --destructive &lt;destructiveChanges.xml path&gt;\\n\u003C\u002Fcode\u003E\u003C\u002Fpre\u003E\\n\u003Cblockquote\u003E\\n\u003Cp\u003E\u003Cstrong\u003EWarning:\u003C\u002Fstrong\u003E Full destructive deploy is deliberately not supported\u003C\u002Fp\u003E\\n\u003C\u002Fblockquote\u003E\\n\u003Cblockquote\u003E\\n\u003Cp\u003E\u003Cstrong\u003EWarning:\u003C\u002Fstrong\u003E This command deletes the metadata files from Salesforce, but they remain on the filesystem\u003C\u002Fp\u003E\\n\u003C\u002Fblockquote\u003E\\n\u003Ch3 id=\\\"apply-standard-patches-and-renderers-to-metadata\\\"\u003EApply &#39;standard&#39; patches and renderers to metadata\u003C\u002Fh3\u003E\\n\u003Cp\u003ESfdy provides a number of ready-to-use patches that you may find useful.\\nAll these patches serve 2 purposes:\u003C\u002Fp\u003E\\n\u003Col\u003E\\n\u003Cli\u003E\u003Cstrong\u003ERemove useless metadata\u003C\u002Fstrong\u003E (not translated fields, useless FLS in permission sets, roles that are automatically managed by salesforce, profile permissions in standard profiles, stuff created by managed packages at installation time)\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Cstrong\u003EAdd useful metadata\u003C\u002Fstrong\u003E. We want our repo to really be the &#39;source of truth&#39; (ALL profile permissions, not only the enabled ones. ALL object permissions. Profile configuration of objects\u002Fapplications\u002Ftabs that we DON&#39;T want to version because they&#39;re not used or we&#39;re not the mantainer of those metadata)\u003C\u002Fli\u003E\\n\u003C\u002Fol\u003E\\n\u003Cp\u003EAll of these patches can be disabled, so you can incrementally adopt them or skip a specific patch if you don&#39;t find it useful.\u003C\u002Fp\u003E\\n\u003Cp\u003EIn addition to metadata patching, \u003Ccode\u003Esfdy\u003C\u002Fcode\u003E provides an out-of-the-box renderer to handle static resource bundles.\u003C\u002Fp\u003E\\n\u003Cp\u003EFirst of all, create the configuration file \u003Ccode\u003E.sfdy.json\u003C\u002Fcode\u003E in the root folder of the salesforce project:\u003C\u002Fp\u003E\\n\u003Cpre\u003E\u003Ccode\u003E$ sfdy init\\n\u003C\u002Fcode\u003E\u003C\u002Fpre\u003E\\n\u003Cp\u003EThe configuration file is a JSON object:\u003C\u002Fp\u003E\\n\u003Cpre\u003E\u003Ccode class=\\\"language-json\\\"\u003E{\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003E&quot;permissionSets&quot;\u003C\u002Fspan\u003E: {\\n    \u003Cspan class=\\\"hljs-attr\\\"\u003E&quot;stripUselessFls&quot;\u003C\u002Fspan\u003E: \u003Cspan class=\\\"hljs-literal\\\"\u003Etrue\u003C\u002Fspan\u003E\\n  },\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003E&quot;objectTranslations&quot;\u003C\u002Fspan\u003E: {\\n    \u003Cspan class=\\\"hljs-attr\\\"\u003E&quot;stripUntranslatedFields&quot;\u003C\u002Fspan\u003E: \u003Cspan class=\\\"hljs-literal\\\"\u003Etrue\u003C\u002Fspan\u003E,\\n    \u003Cspan class=\\\"hljs-attr\\\"\u003E&quot;stripNotVersionedFields&quot;\u003C\u002Fspan\u003E: \u003Cspan class=\\\"hljs-literal\\\"\u003Etrue\u003C\u002Fspan\u003E\\n  },\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003E&quot;preDeployPlugins&quot;\u003C\u002Fspan\u003E: [],\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003E&quot;postRetrievePlugins&quot;\u003C\u002Fspan\u003E: [],\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003E&quot;renderers&quot;\u003C\u002Fspan\u003E: [],\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003E&quot;profiles&quot;\u003C\u002Fspan\u003E: {\\n    \u003Cspan class=\\\"hljs-attr\\\"\u003E&quot;addAllUserPermissions&quot;\u003C\u002Fspan\u003E: \u003Cspan class=\\\"hljs-literal\\\"\u003Efalse\u003C\u002Fspan\u003E,\\n    \u003Cspan class=\\\"hljs-attr\\\"\u003E&quot;addDisabledVersionedObjects&quot;\u003C\u002Fspan\u003E: \u003Cspan class=\\\"hljs-literal\\\"\u003Etrue\u003C\u002Fspan\u003E,\\n    \u003Cspan class=\\\"hljs-attr\\\"\u003E&quot;addExtraObjects&quot;\u003C\u002Fspan\u003E: [\u003Cspan class=\\\"hljs-string\\\"\u003E&quot;*&quot;\u003C\u002Fspan\u003E, \u003Cspan class=\\\"hljs-string\\\"\u003E&quot;!*__?&quot;\u003C\u002Fspan\u003E, \u003Cspan class=\\\"hljs-string\\\"\u003E&quot;!CommSubscription*&quot;\u003C\u002Fspan\u003E],\\n    \u003Cspan class=\\\"hljs-attr\\\"\u003E&quot;addExtraTabVisibility&quot;\u003C\u002Fspan\u003E: [\u003Cspan class=\\\"hljs-string\\\"\u003E&quot;standard-*&quot;\u003C\u002Fspan\u003E],\\n    \u003Cspan class=\\\"hljs-attr\\\"\u003E&quot;addExtraApplications&quot;\u003C\u002Fspan\u003E: [\u003Cspan class=\\\"hljs-string\\\"\u003E&quot;standard__*&quot;\u003C\u002Fspan\u003E],\\n    \u003Cspan class=\\\"hljs-attr\\\"\u003E&quot;stripUserPermissionsFromStandardProfiles&quot;\u003C\u002Fspan\u003E: \u003Cspan class=\\\"hljs-literal\\\"\u003Etrue\u003C\u002Fspan\u003E,\\n    \u003Cspan class=\\\"hljs-attr\\\"\u003E&quot;stripUnversionedStuff&quot;\u003C\u002Fspan\u003E: \u003Cspan class=\\\"hljs-literal\\\"\u003Etrue\u003C\u002Fspan\u003E\\n  },\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003E&quot;roles&quot;\u003C\u002Fspan\u003E: {\\n    \u003Cspan class=\\\"hljs-attr\\\"\u003E&quot;stripPartnerRoles&quot;\u003C\u002Fspan\u003E: \u003Cspan class=\\\"hljs-literal\\\"\u003Etrue\u003C\u002Fspan\u003E\\n  },\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003E&quot;staticResources&quot;\u003C\u002Fspan\u003E: {\\n    \u003Cspan class=\\\"hljs-attr\\\"\u003E&quot;useBundleRenderer&quot;\u003C\u002Fspan\u003E: [\u003Cspan class=\\\"hljs-string\\\"\u003E&quot;*.resource&quot;\u003C\u002Fspan\u003E]\\n  },\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003E&quot;stripManagedPackageFields&quot;\u003C\u002Fspan\u003E: [\u003Cspan class=\\\"hljs-string\\\"\u003E&quot;et4ae5&quot;\u003C\u002Fspan\u003E]\\n}\\n\u003C\u002Fcode\u003E\u003C\u002Fpre\u003E\\n\u003Ch4 id=\\\"permissionsets\\\"\u003EpermissionSets\u003C\u002Fh4\u003E\\n\u003Ctable\u003E\\n\u003Cthead\u003E\\n\u003Ctr\u003E\\n\u003Cth\u003EPatch\u003C\u002Fth\u003E\\n\u003Cth\u003EDescription\u003C\u002Fth\u003E\\n\u003C\u002Ftr\u003E\\n\u003C\u002Fthead\u003E\\n\u003Ctbody\u003E\u003Ctr\u003E\\n\u003Ctd\u003EstripUselessFls\u003C\u002Ftd\u003E\\n\u003Ctd\u003Eif \u003Ccode\u003EstripUselessFls\u003C\u002Fcode\u003E is \u003Ccode\u003Etrue\u003C\u002Fcode\u003E, \u003Ccode\u003EfieldPermissions\u003C\u002Fcode\u003E in which both \u003Ccode\u003Ereadable\u003C\u002Fcode\u003E and \u003Ccode\u003Eeditable\u003C\u002Fcode\u003E tags are \u003Ccode\u003Efalse\u003C\u002Fcode\u003E are removed from the XML. They are totally redundand since a \u003Ccode\u003EPermissionSet\u003C\u002Fcode\u003E can only add permissions.\u003C\u002Ftd\u003E\\n\u003C\u002Ftr\u003E\\n\u003C\u002Ftbody\u003E\u003C\u002Ftable\u003E\\n\u003Ch4 id=\\\"objecttranslations\\\"\u003EobjectTranslations\u003C\u002Fh4\u003E\\n\u003Ctable\u003E\\n\u003Cthead\u003E\\n\u003Ctr\u003E\\n\u003Cth\u003EPatch\u003C\u002Fth\u003E\\n\u003Cth\u003EMetadata\u003C\u002Fth\u003E\\n\u003Cth\u003EDescription\u003C\u002Fth\u003E\\n\u003C\u002Ftr\u003E\\n\u003C\u002Fthead\u003E\\n\u003Ctbody\u003E\u003Ctr\u003E\\n\u003Ctd\u003EstripUntranslatedFields\u003C\u002Ftd\u003E\\n\u003Ctd\u003ETranslations, CustomObjectTranslation, GlobalValueSetTranslation, StandardValueSetTranslation\u003C\u002Ftd\u003E\\n\u003Ctd\u003Eif \u003Ccode\u003EstripUntranslatedFields\u003C\u002Fcode\u003E is \u003Ccode\u003Etrue\u003C\u002Fcode\u003E, untranslated tags are removed from the XML.\u003C\u002Ftd\u003E\\n\u003C\u002Ftr\u003E\\n\u003Ctr\u003E\\n\u003Ctd\u003EstripNotVersionedFields\u003C\u002Ftd\u003E\\n\u003Ctd\u003ECustomObjectTranslation\u003C\u002Ftd\u003E\\n\u003Ctd\u003Eif \u003Ccode\u003EstripNotVersionedFields\u003C\u002Fcode\u003E is \u003Ccode\u003Etrue\u003C\u002Fcode\u003E, translated fields that are not present in the file system in the corresponding \u003Ccode\u003E.object\u003C\u002Fcode\u003E files, are removed from the XML.\u003C\u002Ftd\u003E\\n\u003C\u002Ftr\u003E\\n\u003C\u002Ftbody\u003E\u003C\u002Ftable\u003E\\n\u003Ch4 id=\\\"profiles\\\"\u003Eprofiles\u003C\u002Fh4\u003E\\n\u003Ctable\u003E\\n\u003Cthead\u003E\\n\u003Ctr\u003E\\n\u003Cth\u003EPatch\u003C\u002Fth\u003E\\n\u003Cth\u003EDescription\u003C\u002Fth\u003E\\n\u003C\u002Ftr\u003E\\n\u003C\u002Fthead\u003E\\n\u003Ctbody\u003E\u003Ctr\u003E\\n\u003Ctd\u003EaddAllUserPermissions\u003C\u002Ftd\u003E\\n\u003Ctd\u003ESalesforce does not retrieve disabled \u003Ccode\u003EuserPermissions\u003C\u002Fcode\u003E. If \u003Ccode\u003EaddAllUserPermissions\u003C\u002Fcode\u003E is \u003Ccode\u003Etrue\u003C\u002Fcode\u003E, all permissions are retrieved\u003C\u002Ftd\u003E\\n\u003C\u002Ftr\u003E\\n\u003Ctr\u003E\\n\u003Ctd\u003EaddDisabledVersionedObjects\u003C\u002Ftd\u003E\\n\u003Ctd\u003ESalesforce does not retrieve totally disabled objects. If \u003Ccode\u003EaddDisabledVersionedObjects\u003C\u002Fcode\u003E is \u003Ccode\u003Etrue\u003C\u002Fcode\u003E, sfdy retrieves also \u003Ccode\u003EobjectsPermissions\u003C\u002Fcode\u003E of objects that are present in the file system (and of course tracked by version control systems)) but are disabled for the profile\u003C\u002Ftd\u003E\\n\u003C\u002Ftr\u003E\\n\u003Ctr\u003E\\n\u003Ctd\u003EaddExtraObjects\u003C\u002Ftd\u003E\\n\u003Ctd\u003ESometimes you want to explicitly configure the access level to some objects even if you&#39;re not interested in versioning the whole object metadata. Now you can. \u003Ccode\u003EaddExtraObjects\u003C\u002Fcode\u003E is an array of glob patterns of the objects of which \u003Ccode\u003EobjectPermissions\u003C\u002Fcode\u003E you want to add to the profile (the glob patterns match against the \u003Ccode\u003E&lt;member&gt;\u003C\u002Fcode\u003E content in \u003Ccode\u003Epackage.xml\u003C\u002Fcode\u003E)\u003C\u002Ftd\u003E\\n\u003C\u002Ftr\u003E\\n\u003Ctr\u003E\\n\u003Ctd\u003EaddExtraTabVisibility\u003C\u002Ftd\u003E\\n\u003Ctd\u003ESometimes you want to explicitly set the \u003Ccode\u003ETabVisibility\u003C\u002Fcode\u003E of some tabs even if you&#39;re not interested in versioning the object\u002Ftab metadata. Now you can. \u003Ccode\u003EaddExtraTabVisibility\u003C\u002Fcode\u003E is an array of glob patterns of the tabs whose \u003Ccode\u003EtabVisibilities\u003C\u002Fcode\u003E you want to add to the profile (the glob patterns match against the \u003Ccode\u003E&lt;member&gt;\u003C\u002Fcode\u003E content in \u003Ccode\u003Epackage.xml\u003C\u002Fcode\u003E)\u003C\u002Ftd\u003E\\n\u003C\u002Ftr\u003E\\n\u003Ctr\u003E\\n\u003Ctd\u003EstripUserPermissionsFromStandardProfiles\u003C\u002Ftd\u003E\\n\u003Ctd\u003EUser Permissions are not editable in standard profiles, and they change almost every Salesforce release causing errors that can be avoided. Set this flag to \u003Ccode\u003Etrue\u003C\u002Fcode\u003E to automatically remove them\u003C\u002Ftd\u003E\\n\u003C\u002Ftr\u003E\\n\u003Ctr\u003E\\n\u003Ctd\u003EstripUnversionedStuff\u003C\u002Ftd\u003E\\n\u003Ctd\u003EThis flag &#39;sanitizes&#39; the profiles, removing \u003Ccode\u003EfieldPermissions\u003C\u002Fcode\u003E, \u003Ccode\u003EclassAccesses\u003C\u002Fcode\u003E, \u003Ccode\u003EpageAccesses\u003C\u002Fcode\u003E, \u003Ccode\u003ElayoutAssignments\u003C\u002Fcode\u003E that are not related to stuff tracked under version control. I can&#39;t really see any reason not to enable this option, that can help avoiding errors made by developers during code\u002Fmetadata versioning\u003C\u002Ftd\u003E\\n\u003C\u002Ftr\u003E\\n\u003C\u002Ftbody\u003E\u003C\u002Ftable\u003E\\n\u003Ch4 id=\\\"roles\\\"\u003Eroles\u003C\u002Fh4\u003E\\n\u003Ctable\u003E\\n\u003Cthead\u003E\\n\u003Ctr\u003E\\n\u003Cth\u003EPatch\u003C\u002Fth\u003E\\n\u003Cth\u003EDescription\u003C\u002Fth\u003E\\n\u003C\u002Ftr\u003E\\n\u003C\u002Fthead\u003E\\n\u003Ctbody\u003E\u003Ctr\u003E\\n\u003Ctd\u003EstripPartnerRoles\u003C\u002Ftd\u003E\\n\u003Ctd\u003Eif \u003Ccode\u003EstripPartnerRoles\u003C\u002Fcode\u003E is \u003Ccode\u003Etrue\u003C\u002Fcode\u003E, roles that end with \u003Ccode\u003EPartnerUser[0-9]*.role\u003C\u002Fcode\u003E are removed even if a \u003Ccode\u003E*\u003C\u002Fcode\u003E is used in \u003Ccode\u003Epackage.xml\u003C\u002Fcode\u003E. They are automatically created by Salesforce when you create a Partner Account, so there&#39;s no need to track them them using version control\u003C\u002Ftd\u003E\\n\u003C\u002Ftr\u003E\\n\u003C\u002Ftbody\u003E\u003C\u002Ftable\u003E\\n\u003Ch4 id=\\\"staticresources\\\"\u003EstaticResources\u003C\u002Fh4\u003E\\n\u003Ctable\u003E\\n\u003Cthead\u003E\\n\u003Ctr\u003E\\n\u003Cth\u003ERenderer\u003C\u002Fth\u003E\\n\u003Cth\u003EMetadata\u003C\u002Fth\u003E\\n\u003Cth\u003EDescription\u003C\u002Fth\u003E\\n\u003C\u002Ftr\u003E\\n\u003C\u002Fthead\u003E\\n\u003Ctbody\u003E\u003Ctr\u003E\\n\u003Ctd\u003EuseBundleRenderer\u003C\u002Ftd\u003E\\n\u003Ctd\u003EStaticResource\u003C\u002Ftd\u003E\\n\u003Ctd\u003Eglob pattern to identify static resource files to handle as an uncompressed bundle. The \u003Ccode\u003EcontentType\u003C\u002Fcode\u003E of the \u003Ccode\u003E.resource-meta.xml\u003C\u002Fcode\u003E file must be \u003Ccode\u003Eapplication\u002Fzip\u003C\u002Fcode\u003E. This renderer retrieves directly the uncompressed folder instead of the \u003Ccode\u003E.resource\u003C\u002Fcode\u003E file. If you deploy a single file inside the bundle, the \u003Ccode\u003E.resource\u003C\u002Fcode\u003E file is rebuilded behind the scenes and deployed in place of the single specified file\u003C\u002Ftd\u003E\\n\u003C\u002Ftr\u003E\\n\u003C\u002Ftbody\u003E\u003C\u002Ftable\u003E\\n\u003Ch4 id=\\\"other\\\"\u003Eother\u003C\u002Fh4\u003E\\n\u003Ctable\u003E\\n\u003Cthead\u003E\\n\u003Ctr\u003E\\n\u003Cth\u003EPatch\u003C\u002Fth\u003E\\n\u003Cth\u003EMetadata\u003C\u002Fth\u003E\\n\u003Cth\u003EDescription\u003C\u002Fth\u003E\\n\u003C\u002Ftr\u003E\\n\u003C\u002Fthead\u003E\\n\u003Ctbody\u003E\u003Ctr\u003E\\n\u003Ctd\u003EstripManagedPackageFields\u003C\u002Ftd\u003E\\n\u003Ctd\u003ECustomObject, PermissionSet, Profile\u003C\u002Ftd\u003E\\n\u003Ctd\u003EArray of namespaces of stuff created by managed packages (eg Marketing Cloud) that we don&#39;t want to track changes using Version Control. This plugin removes \u003Ccode\u003Efields\u003C\u002Fcode\u003E, \u003Ccode\u003EpicklistValues\u003C\u002Fcode\u003E, \u003Ccode\u003Eweblinks\u003C\u002Fcode\u003E from \u003Ccode\u003ECustomObject\u003C\u002Fcode\u003E and \u003Ccode\u003EfieldPermissions\u003C\u002Fcode\u003E from \u003Ccode\u003EProfile\u003C\u002Fcode\u003E and \u003Ccode\u003EPermisissionSet\u003C\u002Fcode\u003E\u003C\u002Ftd\u003E\\n\u003C\u002Ftr\u003E\\n\u003C\u002Ftbody\u003E\u003C\u002Ftable\u003E\\n\u003Ch3 id=\\\"build-your-own-plugins\\\"\u003EBuild your own plugins\u003C\u002Fh3\u003E\\n\u003Cp\u003E\u003Ccode\u003Esfdy\u003C\u002Fcode\u003E offers a convenient way to develop your own plugins. This is really useful in many cases. A simple  use case may be changing named credential&#39;s endpoints or email addresses in workflow&#39;s email alerts based on the target org, but the possibilities are endless. You can even query salesforce (rest api or tooling api) to conditionally apply transformations to the metadata on the basis of information coming from the target org.\u003C\u002Fp\u003E\\n\u003Cp\u003EAll the standard plugins are built using the plugin engine of \u003Ccode\u003Esfdy\u003C\u002Fcode\u003E, so the best reference to understand how to develop a custom plugin is to look at the \u003Ca href=\\\"https:\u002F\u002Fhttps:\u002F\u002Fgithub.com\u002Fmicheletriaca\u002Fsfdy\u002Ftree\u002Fmaster\u002Fsrc\u002Fplugins\\\"\u003Eplugins\u003C\u002Fa\u003E folder in which all the standard plugins reside.\u003C\u002Fp\u003E\\n\u003Cp\u003EA plugin is a \u003Ccode\u003E.js\u003C\u002Fcode\u003E module that exports a function with this signature:\u003C\u002Fp\u003E\\n\u003Cpre\u003E\u003Ccode class=\\\"language-javascript\\\"\u003E\u003Cspan class=\\\"hljs-built_in\\\"\u003Emodule\u003C\u002Fspan\u003E.exports = \u003Cspan class=\\\"hljs-keyword\\\"\u003Easync\u003C\u002Fspan\u003E (context, helpers, utils) =&gt; {\\n  \u003Cspan class=\\\"hljs-comment\\\"\u003E\u002F\u002FTODO -&gt; Plugin implementation\u003C\u002Fspan\u003E\\n}\\n\u003C\u002Fcode\u003E\u003C\u002Fpre\u003E\\n\u003Ch4 id=\\\"context\\\"\u003E\u003Ccode\u003Econtext\u003C\u002Fcode\u003E\u003C\u002Fh4\u003E\\n\u003Cul\u003E\\n\u003Cli\u003E\u003Ccode\u003EsfdcConnector\u003C\u002Fcode\u003E - an instance of a Salesforce connector. It exposes 2 methods, \u003Ccode\u003Equery\u003C\u002Fcode\u003E and \u003Ccode\u003Erest\u003C\u002Fcode\u003E\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ccode\u003Eenvironment\u003C\u002Fcode\u003E - The value of the environment variable \u003Ccode\u003Eenvironment\u003C\u002Fcode\u003E. It can be used to execute different patches in different sandboxes\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ccode\u003Eusername\u003C\u002Fcode\u003E - The username used to login\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ccode\u003Elog\u003C\u002Fcode\u003E - A \u003Ccode\u003Elog\u003C\u002Fcode\u003E function that should be used instead of \u003Ccode\u003Econsole.log\u003C\u002Fcode\u003E if you want to log something. The reason is that, when used as a library, \u003Ccode\u003Esfdy\u003C\u002Fcode\u003E can accept a custom logger implementation. When used as a command line tool, the \u003Ccode\u003Elog\u003C\u002Fcode\u003E function fallbacks to \u003Ccode\u003Econsole.log\u003C\u002Fcode\u003E\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ccode\u003Epkg\u003C\u002Fcode\u003E - A json representation of the \u003Ccode\u003Epackage.xml\u003C\u002Fcode\u003E\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ccode\u003Econfig\u003C\u002Fcode\u003E - The content of \u003Ccode\u003E.sfdy.json\u003C\u002Fcode\u003E (as a JSON object)\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\u003Ch4 id=\\\"helpers\\\"\u003E\u003Ccode\u003Ehelpers\u003C\u002Fcode\u003E\u003C\u002Fh4\u003E\\n\u003Cul\u003E\\n\u003Cli\u003E\u003Ccode\u003ExmlTransformer (pattern, callback1)\u003C\u002Fcode\u003E - This helper allows the developer to easily transform one or more metadata (identified by \u003Ccode\u003Epattern\u003C\u002Fcode\u003E), using a \u003Ccode\u003Ecallback\u003C\u002Fcode\u003E function. See \u003Ca href=\\\"#examples\\\"\u003Eexamples\u003C\u002Fa\u003E to understand how to use it\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ccode\u003EmodifyRawContent (pattern, callback2)\u003C\u002Fcode\u003E - This helper allows the developer to manipulate the whole metadata file. It is useful if you want to edit a file that is not an xml, or if you want to apply drastic transformations\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ccode\u003EfilterMetadata (filterFn)\u003C\u002Fcode\u003E - This helper can be used in a post-retrieve plugin to filter out unwanted metadata\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ccode\u003ErequireMetadata (pattern, callback3)\u003C\u002Fcode\u003E - This helper can be used to define dependencies between metadata. For example, a \u003Ccode\u003EProfile\u003C\u002Fcode\u003E must be retrieved together with \u003Ccode\u003ECustomObject\u003C\u002Fcode\u003E metadata in order to retrieve the list of \u003Ccode\u003EfieldPermissions\u003C\u002Fcode\u003E. By defining such a dependency using \u003Ccode\u003ErequireMetadata\u003C\u002Fcode\u003E, whenever you retrieve a \u003Ccode\u003EProfile\u003C\u002Fcode\u003E, all dependent metadata are automatically included in the \u003Ccode\u003Epackage.xml\u003C\u002Fcode\u003E and eventually discarded at the end of the retrieve operation, just to retrieve all the relted parts of the original metadata you wanted to retrieve\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ccode\u003EaddRemapper (regex, callback4)\u003C\u002Fcode\u003E - This helper can be used to map an arbitrary file to a file representing a Salesforce metadata. For example, it can be used to instruct \u003Ccode\u003Esfdy\u003C\u002Fcode\u003E to deploy\u002Fretrieve a \u003Ccode\u003E.resource\u003C\u002Fcode\u003E file when you deploy\u002Fretrieve a file inside an uncompressed bundle. \u003Ccode\u003Eregex\u003C\u002Fcode\u003E is a \u003Ccode\u003ERegExp\u003C\u002Fcode\u003E object defining the matching patterns\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\u003Ch5 id=\\\"callback1-filename-fjson-requirefiles-addfiles-cleanfiles\\\"\u003E\u003Ccode\u003Ecallback1 (filename, fJson, requireFiles, addFiles, cleanFiles)\u003C\u002Fcode\u003E:\u003C\u002Fh5\u003E\\n\u003Cul\u003E\\n\u003Cli\u003E\u003Ccode\u003Efilename\u003C\u002Fcode\u003E - The current filename\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ccode\u003EfJson\u003C\u002Fcode\u003E  -  JSON representation of the XML. You can modify the object to modify the XML\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ccode\u003ErequireFiles (filenames: string[]): Promise&lt;Entry[]&gt;\u003C\u002Fcode\u003E - An async function taking an array of glob patterns and returning an array of \u003Ccode\u003E{ fileName: string, data: Buffer }\u003C\u002Fcode\u003E objects representing files. The files are taken from memory if you are requiring files that you are retrieving\u002Fdeploying, otherwise they are searched in the filesystem. These files will be added to the files that will be retrieved\u002Fdeployed unless you specify a filter with the \u003Ccode\u003EfilterMetadata\u003C\u002Fcode\u003E helper. This helper is useful when you want to act on a metadata on the basis on another one (for example you need to retrieve the versioned fields from a \u003Ccode\u003E.object\u003C\u002Fcode\u003E file to add\u002Fdelete FLS from \u003Ccode\u003Eprofiles\u003C\u002Fcode\u003E).\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ccode\u003EaddFiles (entries: Entry[])\u003C\u002Fcode\u003E - A function taking an array of \u003Ccode\u003E{ fileName: string, data: Buffer }\u003C\u002Fcode\u003E objects representing files. This function is similar to \u003Ccode\u003ErequireFiles\u003C\u002Fcode\u003E. The main difference is that \u003Ccode\u003ErequireFiles\u003C\u002Fcode\u003E looks for existing files, while \u003Ccode\u003EaddFiles\u003C\u002Fcode\u003E let you add arbitrary data to the retrieved\u002Fdeployed files. For this reason, it is best suited to be used in a \u003Ccode\u003Erenderer\u003C\u002Fcode\u003E\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ccode\u003EcleanFiles (filenames: string[])\u003C\u002Fcode\u003E - A function taking an array of glob patterns. This function let you specify files that should be deleted. It should be used in the context of an after retrieve plugin or a transform renderer (for example it is used to clean up an uncompressed staticresource bundle before uncompressing the \u003Ccode\u003E.resource\u003C\u002Fcode\u003E file coming from Salesforce)\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\u003Ch5 id=\\\"callback2-filename-file-requirefiles-addfiles-cleanfiles\\\"\u003E\u003Ccode\u003Ecallback2 (filename, file, requireFiles, addFiles, cleanFiles)\u003C\u002Fcode\u003E:\u003C\u002Fh5\u003E\\n\u003Cul\u003E\\n\u003Cli\u003E\u003Ccode\u003Efilename\u003C\u002Fcode\u003E - The current filename\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ccode\u003Efile\u003C\u002Fcode\u003E is an object containing a \u003Ccode\u003Edata\u003C\u002Fcode\u003E field. \u003Ccode\u003Edata\u003C\u002Fcode\u003E is a buffer containing the whole file. You can modify \u003Ccode\u003Edata\u003C\u002Fcode\u003E to modify the file\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ccode\u003ErequireFiles (filenames: string[]): Promise&lt;Entry[]&gt;\u003C\u002Fcode\u003E - See \u003Ca href=\\\"#callback1-filename-fjson-requirefiles-addfiles-cleanfiles\\\"\u003Ecallback1\u003C\u002Fa\u003E\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ccode\u003EaddFiles (entries: Entry[])\u003C\u002Fcode\u003E - See \u003Ca href=\\\"#callback1-filename-fjson-requirefiles-addfiles-cleanfiles\\\"\u003Ecallback1\u003C\u002Fa\u003E\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ccode\u003EcleanFiles (filenames: string[])\u003C\u002Fcode\u003E - See \u003Ca href=\\\"#callback1-filename-fjson-requirefiles-addfiles-cleanfiles\\\"\u003Ecallback1\u003C\u002Fa\u003E\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\u003Ch5 id=\\\"filterfn-filename\\\"\u003E\u003Ccode\u003EfilterFn (filename)\u003C\u002Fcode\u003E:\u003C\u002Fh5\u003E\\n\u003Cul\u003E\\n\u003Cli\u003E\u003Ccode\u003Efilename: string\u003C\u002Fcode\u003E - The current filename, including the path (for example \u003Ccode\u003Eclasses\u002FMyClass.cls\u003C\u002Fcode\u003E)\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\u003Ch5 id=\\\"callback3--filterpackage-requirepackage-\\\"\u003E\u003Ccode\u003Ecallback3 ({ filterPackage, requirePackage })\u003C\u002Fcode\u003E:\u003C\u002Fh5\u003E\\n\u003Cul\u003E\\n\u003Cli\u003E\u003Cp\u003E\u003Ccode\u003EfilterPackage (arrayOfMetadata: string[])\u003C\u002Fcode\u003E - A function taking an array of metadata that should be included together with metadata matched by \u003Ccode\u003Epattern\u003C\u002Fcode\u003E. The &#39;companions&#39; will be retrieved only if they are present in the stored \u003Ccode\u003Epackage.xml\u003C\u002Fcode\u003E. For example, if you retrieve a profile, the profile will be retrieved together with the referenced \u003Ccode\u003ECustomObject\u003C\u002Fcode\u003E\u003C\u002Fp\u003E\\n\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Cp\u003E\u003Ccode\u003ErequirePackage (arrayOfMetadata: string[])\u003C\u002Fcode\u003E - The same as \u003Ccode\u003EfilterPackage\u003C\u002Fcode\u003E, but the included metadata will be added to \u003Ccode\u003Epackage.xml\u003C\u002Fcode\u003E whether they were present before or not. In this case \u003Ccode\u003EarrayOfMetadata\u003C\u002Fcode\u003E is an array of &#39;pseudo&#39; glob patterns (ex. \u003Ccode\u003E[&#39;CustomApplication\u002F*&#39;, &#39;CustomObject\u002FAccount&#39;]\u003C\u002Fcode\u003E)\u003C\u002Fp\u003E\\n\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\u003Ch5 id=\\\"callback4-filename-regexp-string\\\"\u003E\u003Ccode\u003Ecallback4 (fileName, regexp): string\u003C\u002Fcode\u003E:\u003C\u002Fh5\u003E\\n\u003Cul\u003E\\n\u003Cli\u003E\u003Ccode\u003EfileName: string\u003C\u002Fcode\u003E - The current filename, including the path (for example \u003Ccode\u003Eclasses\u002FMyClass.cls\u003C\u002Fcode\u003E)\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ccode\u003Eregexp: RegExp\u003C\u002Fcode\u003E - The regexp originally passed to the helper\u003C\u002Fli\u003E\\n\u003Cli\u003Ereturn value: a string representing the mapped filename\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\u003Ch3 id=\\\"utils--parsexml-buildxml-parsexmlnoarray-\\\"\u003Eutils \u003Ccode\u003E{ parseXml, buildXml, parseXmlNoArray }\u003C\u002Fcode\u003E\u003C\u002Fh3\u003E\\n\u003Cp\u003EHelpers function. See \u003Ca href=\\\"https:\u002F\u002Fhttps:\u002F\u002Fgithub.com\u002Fmicheletriaca\u002Fsfdy\u002Ftree\u002Fmaster\u002Fsrc\u002Futils\u002Fxml-utils.js\\\"\u003Ehere\u003C\u002Fa\u003E\u003C\u002Fp\u003E\\n\u003Cp\u003ETo instruct \u003Ccode\u003Esfdy\u003C\u002Fcode\u003E to use your plugin, you have to configure the path of your plugin in the \u003Ccode\u003E.sfdy.json\u003C\u002Fcode\u003E file:\u003C\u002Fp\u003E\\n\u003Cpre\u003E\u003Ccode class=\\\"language-json\\\"\u003E{\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003E&quot;preDeployPlugins&quot;\u003C\u002Fspan\u003E: [\u003Cspan class=\\\"hljs-string\\\"\u003E&quot;sfdy-plugins\u002Fmy-awesome-plugin.js&quot;\u003C\u002Fspan\u003E],\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003E&quot;postRetrievePlugins&quot;\u003C\u002Fspan\u003E: [\u003Cspan class=\\\"hljs-string\\\"\u003E&quot;sfdy-plugins\u002Fmy-wonderful-plugin.js&quot;\u003C\u002Fspan\u003E]\\n}\\n\u003C\u002Fcode\u003E\u003C\u002Fpre\u003E\\n\u003Cp\u003EYou have 2 different &#39;hooks&#39; to choose from:\u003C\u002Fp\u003E\\n\u003Cul\u003E\\n\u003Cli\u003E\u003Ccode\u003EpostRetrievePlugins\u003C\u002Fcode\u003E are executed just before the metadata retrieved from Salesforce is stored on the filesystem\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ccode\u003EpreDeployPlugins\u003C\u002Fcode\u003E are executed before deploying metadata to Salesforce\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\u003Ch4 id=\\\"examples\\\"\u003EExamples\u003C\u002Fh4\u003E\\n\u003Ch5 id=\\\"change-the-endpoint-of-a-named-credential-better-suited-as-a-predeployplugin\\\"\u003EChange the endpoint of a named credential (better suited as a \u003Ccode\u003EpreDeployPlugin\u003C\u002Fcode\u003E)\u003C\u002Fh5\u003E\\n\u003Cpre\u003E\u003Ccode class=\\\"language-javascript\\\"\u003E\u003Cspan class=\\\"hljs-built_in\\\"\u003Emodule\u003C\u002Fspan\u003E.exports = \u003Cspan class=\\\"hljs-keyword\\\"\u003Easync\u003C\u002Fspan\u003E ({ environment, log }, helpers) =&gt; {\\n  helpers.xmlTransformer(\u003Cspan class=\\\"hljs-string\\\"\u003E&#x27;namedCredentials\u002F*&#x27;\u003C\u002Fspan\u003E, \u003Cspan class=\\\"hljs-keyword\\\"\u003Easync\u003C\u002Fspan\u003E (filename, fJson) =&gt; {\\n    log(\u003Cspan class=\\\"hljs-string\\\"\u003E`Patching \u003Cspan class=\\\"hljs-subst\\\"\u003E${filename}\u003C\u002Fspan\u003E...`\u003C\u002Fspan\u003E)\\n    \u003Cspan class=\\\"hljs-keyword\\\"\u003Eif\u003C\u002Fspan\u003E(filename === \u003Cspan class=\\\"hljs-string\\\"\u003E&#x27;idontwanttochangethis.NamedCredential&#x27;\u003C\u002Fspan\u003E) \u003Cspan class=\\\"hljs-keyword\\\"\u003Ereturn\u003C\u002Fspan\u003E\\n\\n    \u003Cspan class=\\\"hljs-keyword\\\"\u003Eswitch\u003C\u002Fspan\u003E(environment) {\\n      \u003Cspan class=\\\"hljs-keyword\\\"\u003Ecase\u003C\u002Fspan\u003E \u003Cspan class=\\\"hljs-string\\\"\u003E&#x27;uat&#x27;\u003C\u002Fspan\u003E:\\n        fJson.endpoint = \u003Cspan class=\\\"hljs-string\\\"\u003E&#x27;https:\u002F\u002Fuat-endpoint.com\u002Frestservice&#x27;\u003C\u002Fspan\u003E\\n        \u003Cspan class=\\\"hljs-keyword\\\"\u003Ebreak\u003C\u002Fspan\u003E\\n      \u003Cspan class=\\\"hljs-keyword\\\"\u003Ecase\u003C\u002Fspan\u003E \u003Cspan class=\\\"hljs-string\\\"\u003E&#x27;prod&#x27;\u003C\u002Fspan\u003E:\\n        fJson.endpoint = \u003Cspan class=\\\"hljs-string\\\"\u003E&#x27;https:\u002F\u002Fprod-endpoint.com\u002Frestservice&#x27;\u003C\u002Fspan\u003E\\n        \u003Cspan class=\\\"hljs-keyword\\\"\u003Ebreak\u003C\u002Fspan\u003E\\n      \u003Cspan class=\\\"hljs-attr\\\"\u003Edefault\u003C\u002Fspan\u003E:\\n        fJson.endpoint = \u003Cspan class=\\\"hljs-string\\\"\u003E&#x27;https:\u002F\u002Ftest-endpoint.com\u002Frestservice&#x27;\u003C\u002Fspan\u003E\\n        \u003Cspan class=\\\"hljs-keyword\\\"\u003Ebreak\u003C\u002Fspan\u003E\\n\\n      log(\u003Cspan class=\\\"hljs-string\\\"\u003E&#x27;Done&#x27;\u003C\u002Fspan\u003E)\\n    }\\n  })\\n}\\n\u003C\u002Fcode\u003E\u003C\u002Fpre\u003E\\n\u003Ch5 id=\\\"remove-every-field-and-every-apex-class-that-starts-with-test_-better-suited-as-a-postretrieveplugin\\\"\u003ERemove every field and every apex class that starts with \u003Ccode\u003ETest_\u003C\u002Fcode\u003E (better suited as a \u003Ccode\u003EpostRetrievePlugin\u003C\u002Fcode\u003E)\u003C\u002Fh5\u003E\\n\u003Cpre\u003E\u003Ccode class=\\\"language-javascript\\\"\u003E\u003Cspan class=\\\"hljs-built_in\\\"\u003Emodule\u003C\u002Fspan\u003E.exports = \u003Cspan class=\\\"hljs-keyword\\\"\u003Easync\u003C\u002Fspan\u003E ({ environment, log }, helpers) =&gt; {\\n  helpers.xmlTransformer(\u003Cspan class=\\\"hljs-string\\\"\u003E&#x27;objects\u002F*&#x27;\u003C\u002Fspan\u003E, \u003Cspan class=\\\"hljs-keyword\\\"\u003Easync\u003C\u002Fspan\u003E (filename, fJson) =&gt; {\\n    log(\u003Cspan class=\\\"hljs-string\\\"\u003E`Patching \u003Cspan class=\\\"hljs-subst\\\"\u003E${filename}\u003C\u002Fspan\u003E...`\u003C\u002Fspan\u003E)\\n    fJson.fields = (fJson.fields || []).filter(\u003Cspan class=\\\"hljs-function\\\"\u003E\u003Cspan class=\\\"hljs-params\\\"\u003Efield\u003C\u002Fspan\u003E =&gt;\u003C\u002Fspan\u003E !field.FullName[\u003Cspan class=\\\"hljs-number\\\"\u003E0\u003C\u002Fspan\u003E].startsWith(\u003Cspan class=\\\"hljs-string\\\"\u003E&#x27;Test_&#x27;\u003C\u002Fspan\u003E))\\n    log(\u003Cspan class=\\\"hljs-string\\\"\u003E&#x27;Done&#x27;\u003C\u002Fspan\u003E)\\n  })\\n\\n  helpers.filterMetadata(\u003Cspan class=\\\"hljs-function\\\"\u003E\u003Cspan class=\\\"hljs-params\\\"\u003EfileName\u003C\u002Fspan\u003E =&gt;\u003C\u002Fspan\u003E !\u003Cspan class=\\\"hljs-regexp\\\"\u003E\u002Fclasses\\\\\u002FTest_[^\\\\\u002F]+\\\\.cls$\u002F\u003C\u002Fspan\u003E.test(fileName))\\n}\\n\u003C\u002Fcode\u003E\u003C\u002Fpre\u003E\\n\u003Cblockquote\u003E\\n\u003Cp\u003E\u003Cstrong\u003EWarning:\u003C\u002Fstrong\u003E fJson contains the json representation of the metadata file. The root tag of the metadata is omitted for convenience. Every tag is treated as an array\u003C\u002Fp\u003E\\n\u003C\u002Fblockquote\u003E\\n\u003Cblockquote\u003E\\n\u003Cp\u003E\u003Cstrong\u003EWarning:\u003C\u002Fstrong\u003E The callback function ot the \u003Ccode\u003ExmlTransformer\u003C\u002Fcode\u003E helper MUST return a \u003Ccode\u003EPromise\u003C\u002Fcode\u003E\u003C\u002Fp\u003E\\n\u003C\u002Fblockquote\u003E\\n\u003Ch5 id=\\\"query-salesforce-to-apply-advanced-transformations\\\"\u003EQuery Salesforce to apply advanced transformations\u003C\u002Fh5\u003E\\n\u003Cp\u003ESee \u003Ca href=\\\"https:\u002F\u002Fhttps:\u002F\u002Fgithub.com\u002Fmicheletriaca\u002Fsfdy\u002Ftree\u002Fmaster\u002Fsrc\u002Fplugins\u002Fprofile-plugins\u002Fadd-all-permissions-to-custom-profiles.js\\\"\u003Ethis\u003C\u002Fa\u003E\u003C\u002Fp\u003E\\n\u003Ch5 id=\\\"define-dependencies-between-metadata\\\"\u003EDefine dependencies between metadata\u003C\u002Fh5\u003E\\n\u003Cp\u003ESee \u003Ca href=\\\"https:\u002F\u002Fhttps:\u002F\u002Fgithub.com\u002Fmicheletriaca\u002Fsfdy\u002Ftree\u002Fmaster\u002Fsrc\u002Fplugins\u002Fdependency-graph.js\\\"\u003Ethis\u003C\u002Fa\u003E\u003C\u002Fp\u003E\\n\u003Ch3 id=\\\"build-your-own-renderers\\\"\u003EBuild your own renderers\u003C\u002Fh3\u003E\\n\u003Cp\u003EA renderer is a \u003Ccode\u003E.js\u003C\u002Fcode\u003E file that exports an object with this signature:\u003C\u002Fp\u003E\\n\u003Cpre\u003E\u003Ccode class=\\\"language-javascript\\\"\u003E\u003Cspan class=\\\"hljs-built_in\\\"\u003Emodule\u003C\u002Fspan\u003E.exports = {\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003Etransform\u003C\u002Fspan\u003E: \u003Cspan class=\\\"hljs-keyword\\\"\u003Easync\u003C\u002Fspan\u003E (context, helpers, utils) =&gt; {\\n    \u003Cspan class=\\\"hljs-comment\\\"\u003E\u002F\u002FTODO -&gt; Transform\u003C\u002Fspan\u003E\\n  },\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003Euntransform\u003C\u002Fspan\u003E: \u003Cspan class=\\\"hljs-keyword\\\"\u003Easync\u003C\u002Fspan\u003E (context, helpers, utils) =&gt; {\\n    \u003Cspan class=\\\"hljs-comment\\\"\u003E\u002F\u002FTODO -&gt; Untransform\u003C\u002Fspan\u003E\\n  }\\n}\\n\u003C\u002Fcode\u003E\u003C\u002Fpre\u003E\\n\u003Cp\u003EThe \u003Ccode\u003Etransform\u003C\u002Fcode\u003E function is applied after the retrieve operation and after the execution of the post-retrieve plugins. The \u003Ccode\u003Euntransform\u003C\u002Fcode\u003E function is applied as soon as you start a deploy, before the application of the pre deploy plugins and the actual deploy.\u003C\u002Fp\u003E\\n\u003Cp\u003EA renderer can be used to totally transform the metadata in the format you like. For example, you could think to split a \u003Ccode\u003E.object\u003C\u002Fcode\u003E file in different files, one for \u003Ccode\u003Efields\u003C\u002Fcode\u003E and one per \u003Ccode\u003Erecordtypes\u003C\u002Fcode\u003E, or to even convert everything in json, or to represent some information as a \u003Ccode\u003E.csv\u003C\u002Fcode\u003E file. You can do what best fit your needs.\u003C\u002Fp\u003E\\n\u003Cp\u003ETo instruct \u003Ccode\u003Esfdy\u003C\u002Fcode\u003E to use your renderer, you have to configure the path of your renderer in the \u003Ccode\u003E.sfdy.json\u003C\u002Fcode\u003E file:\u003C\u002Fp\u003E\\n\u003Cpre\u003E\u003Ccode class=\\\"language-json\\\"\u003E{\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003E&quot;renderers&quot;\u003C\u002Fspan\u003E: [\u003Cspan class=\\\"hljs-string\\\"\u003E&quot;sfdy-plugins\u002Fmy-awesome-renderer.js&quot;\u003C\u002Fspan\u003E]\\n}\\n\u003C\u002Fcode\u003E\u003C\u002Fpre\u003E\\n\u003Cblockquote\u003E\\n\u003Cp\u003E\u003Cstrong\u003ETip:\u003C\u002Fstrong\u003E You do not have to include the renderer whithin your salesforce project to be able to use it, so you can use your plugin referencing it from all of your project workspaces!\u003C\u002Fp\u003E\\n\u003C\u002Fblockquote\u003E\\n\u003Ch4 id=\\\"example---store-profiles-as-json-files\\\"\u003EExample - Store profiles as json files\u003C\u002Fh4\u003E\\n\u003Cpre\u003E\u003Ccode class=\\\"language-js\\\"\u003E\u003Cspan class=\\\"hljs-built_in\\\"\u003Emodule\u003C\u002Fspan\u003E.exports = {\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003Etransform\u003C\u002Fspan\u003E: \u003Cspan class=\\\"hljs-keyword\\\"\u003Easync\u003C\u002Fspan\u003E (context, helpers, { parseXmlNoArray }) =&gt; {\\n    helpers.modifyRawContent(\u003Cspan class=\\\"hljs-string\\\"\u003E&#x27;profiles\u002F*&#x27;\u003C\u002Fspan\u003E, \u003Cspan class=\\\"hljs-keyword\\\"\u003Easync\u003C\u002Fspan\u003E (filename, file) =&gt; {\\n      \u003Cspan class=\\\"hljs-keyword\\\"\u003Econst\u003C\u002Fspan\u003E fJson = \u003Cspan class=\\\"hljs-keyword\\\"\u003Eawait\u003C\u002Fspan\u003E parseXmlNoArray(file.data)\\n      file.data = Buffer.from(\u003Cspan class=\\\"hljs-built_in\\\"\u003EJSON\u003C\u002Fspan\u003E.stringify(fJson, \u003Cspan class=\\\"hljs-literal\\\"\u003Enull\u003C\u002Fspan\u003E, \u003Cspan class=\\\"hljs-number\\\"\u003E2\u003C\u002Fspan\u003E), \u003Cspan class=\\\"hljs-string\\\"\u003E&#x27;utf8&#x27;\u003C\u002Fspan\u003E)\\n    })\\n  },\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003Euntransform\u003C\u002Fspan\u003E: \u003Cspan class=\\\"hljs-keyword\\\"\u003Easync\u003C\u002Fspan\u003E (context, helpers, { buildXml }) =&gt; {\\n    helpers.modifyRawContent(\u003Cspan class=\\\"hljs-string\\\"\u003E&#x27;profiles\u002F*&#x27;\u003C\u002Fspan\u003E, \u003Cspan class=\\\"hljs-keyword\\\"\u003Easync\u003C\u002Fspan\u003E (filename, file) =&gt; {\\n      \u003Cspan class=\\\"hljs-keyword\\\"\u003Econst\u003C\u002Fspan\u003E fJson = \u003Cspan class=\\\"hljs-built_in\\\"\u003EJSON\u003C\u002Fspan\u003E.parse(file.data.toString())\\n      file.data = Buffer.from(buildXml(fJson), \u003Cspan class=\\\"hljs-string\\\"\u003E&#x27;utf8&#x27;\u003C\u002Fspan\u003E)\\n    })\\n  }\\n}\\n\u003C\u002Fcode\u003E\u003C\u002Fpre\u003E\\n\u003Ch4 id=\\\"example---handle-zip-staticresources-as-uncompressed-folders\\\"\u003EExample - Handle zip staticresources as uncompressed folders\u003C\u002Fh4\u003E\\n\u003Cp\u003ESee \u003Ca href=\\\"https:\u002F\u002Fhttps:\u002F\u002Fgithub.com\u002Fmicheletriaca\u002Fsfdy\u002Ftree\u002Fmaster\u002Fsrc\u002Frenderers\u002Fstatic-resource-bundle.js\\\"\u003Ehere\u003C\u002Fa\u003E\u003C\u002Fp\u003E\\n\u003Ch3 id=\\\"use-sfdy-as-a-library\\\"\u003EUse \u003Ccode\u003Esfdy\u003C\u002Fcode\u003E as a library\u003C\u002Fh3\u003E\\n\u003Cp\u003EIt&#39;s as simple as that:\u003C\u002Fp\u003E\\n\u003Cpre\u003E\u003Ccode\u003E$ npm i sfdy\\n\u003C\u002Fcode\u003E\u003C\u002Fpre\u003E\\n\u003Ch4 id=\\\"retrieve\\\"\u003Eretrieve\u003C\u002Fh4\u003E\\n\u003Cpre\u003E\u003Ccode class=\\\"language-js\\\"\u003E\u003Cspan class=\\\"hljs-keyword\\\"\u003Econst\u003C\u002Fspan\u003E retrieve = \u003Cspan class=\\\"hljs-built_in\\\"\u003Erequire\u003C\u002Fspan\u003E(\u003Cspan class=\\\"hljs-string\\\"\u003E&#x27;sfdy\u002Fsrc\u002Fretrieve&#x27;\u003C\u002Fspan\u003E)\\n\\nretrieve({\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003EbasePath\u003C\u002Fspan\u003E: \u003Cspan class=\\\"hljs-string\\\"\u003E&#x27;root\u002Ffolder&#x27;\u003C\u002Fspan\u003E,\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003Econfig\u003C\u002Fspan\u003E: {\\n    \u003Cspan class=\\\"hljs-comment\\\"\u003E\u002F\u002F.sfdy.json like config\u003C\u002Fspan\u003E\\n  },\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003Efiles\u003C\u002Fspan\u003E: [ \u003Cspan class=\\\"hljs-comment\\\"\u003E\u002F*specific files*\u002F\u003C\u002Fspan\u003E ],\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003EloginOpts\u003C\u002Fspan\u003E: {\\n    \u003Cspan class=\\\"hljs-attr\\\"\u003EserverUrl\u003C\u002Fspan\u003E: creds.url,\\n    \u003Cspan class=\\\"hljs-attr\\\"\u003Eusername\u003C\u002Fspan\u003E: creds.username,\\n    \u003Cspan class=\\\"hljs-attr\\\"\u003Epassword\u003C\u002Fspan\u003E: creds.password\\n  },\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003Emeta\u003C\u002Fspan\u003E: [\u003Cspan class=\\\"hljs-comment\\\"\u003E\u002F*specific meta*\u002F\u003C\u002Fspan\u003E]\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003Elogger\u003C\u002Fspan\u003E: \u003Cspan class=\\\"hljs-function\\\"\u003E(\u003Cspan class=\\\"hljs-params\\\"\u003Emsg: string\u003C\u002Fspan\u003E) =&gt;\u003C\u002Fspan\u003E logger.appendLine(msg)\\n}).then(\u003Cspan class=\\\"hljs-function\\\"\u003E() =&gt;\u003C\u002Fspan\u003E \u003Cspan class=\\\"hljs-built_in\\\"\u003Econsole\u003C\u002Fspan\u003E.log(\u003Cspan class=\\\"hljs-string\\\"\u003E&#x27;Done!&#x27;\u003C\u002Fspan\u003E))\\n\u003C\u002Fcode\u003E\u003C\u002Fpre\u003E\\n\u003Ch4 id=\\\"deploy\\\"\u003Edeploy\u003C\u002Fh4\u003E\\n\u003Cpre\u003E\u003Ccode class=\\\"language-js\\\"\u003E\u003Cspan class=\\\"hljs-keyword\\\"\u003Econst\u003C\u002Fspan\u003E deploy = \u003Cspan class=\\\"hljs-built_in\\\"\u003Erequire\u003C\u002Fspan\u003E(\u003Cspan class=\\\"hljs-string\\\"\u003E&#x27;sfdy\u002Fsrc\u002Fdeploy&#x27;\u003C\u002Fspan\u003E)\\n\\ndeploy({\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003Elogger\u003C\u002Fspan\u003E: \u003Cspan class=\\\"hljs-function\\\"\u003E(\u003Cspan class=\\\"hljs-params\\\"\u003Emsg: string\u003C\u002Fspan\u003E) =&gt;\u003C\u002Fspan\u003E logger.appendLine(msg),\\n  preDeployPlugins,\\n  renderers,\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003EbasePath\u003C\u002Fspan\u003E: \u003Cspan class=\\\"hljs-string\\\"\u003E&#x27;root\u002Ffolder&#x27;\u003C\u002Fspan\u003E,\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003EloginOpts\u003C\u002Fspan\u003E: {\\n    \u003Cspan class=\\\"hljs-attr\\\"\u003EserverUrl\u003C\u002Fspan\u003E: creds.url,\\n    \u003Cspan class=\\\"hljs-attr\\\"\u003Eusername\u003C\u002Fspan\u003E: creds.username,\\n    \u003Cspan class=\\\"hljs-attr\\\"\u003Epassword\u003C\u002Fspan\u003E: creds.password\\n  },\\n  checkOnly,\\n  \u003Cspan class=\\\"hljs-attr\\\"\u003Efiles\u003C\u002Fspan\u003E: [\u003Cspan class=\\\"hljs-string\\\"\u003E&#x27;specific&#x27;\u003C\u002Fspan\u003E, \u003Cspan class=\\\"hljs-string\\\"\u003E&#x27;files&#x27;\u003C\u002Fspan\u003E]\\n}).then(\u003Cspan class=\\\"hljs-function\\\"\u003E() =&gt;\u003C\u002Fspan\u003E \u003Cspan class=\\\"hljs-built_in\\\"\u003Econsole\u003C\u002Fspan\u003E.log(\u003Cspan class=\\\"hljs-string\\\"\u003E&#x27;Done!&#x27;\u003C\u002Fspan\u003E))\\n\u003C\u002Fcode\u003E\u003C\u002Fpre\u003E\\n\u003Ch2 id=\\\"changelog\\\"\u003EChangelog\u003C\u002Fh2\u003E\\n\u003Cul\u003E\\n\u003Cli\u003E\u003Cp\u003E1.4.6\u003C\u002Fp\u003E\\n\u003Cul\u003E\\n\u003Cli\u003EBugfixing: fix regression handling folders in foldered metadata\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Cp\u003E1.4.5\u003C\u002Fp\u003E\\n\u003Cul\u003E\\n\u003Cli\u003EBugfixing: solved &#39;multiple metadata types in same folder&#39; issue. It is now possible to retrieve and deploy correctly wave metadata\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Cp\u003E1.4.4\u003C\u002Fp\u003E\\n\u003Cul\u003E\\n\u003Cli\u003EDestructive changeset: added the possibility to pass both a \u003Ccode\u003Epackage.xml\u003C\u002Fcode\u003E or a glob pattern. See \u003Ca href=\\\"#deploy-a-destructive-changeset\\\"\u003Ehere\u003C\u002Fa\u003E. Thanks \u003Ca href=\\\"https:\u002F\u002Fgithub.com\u002Fzerbfra\\\"\u003Ezerbfra\u003C\u002Fa\u003E\u003C\u002Fli\u003E\\n\u003Cli\u003EBugfixing: fixed crash when \u003Ccode\u003E--diff\u003C\u002Fcode\u003E returned only files outside src folder\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Cp\u003E1.4.3\u003C\u002Fp\u003E\\n\u003Cul\u003E\\n\u003Cli\u003EBugfixing: fixed exclusion glob pattern when using \u003Ccode\u003E--files\u003C\u002Fcode\u003E option\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Cp\u003E1.4.2\u003C\u002Fp\u003E\\n\u003Cul\u003E\\n\u003Cli\u003EBugfixing: fixed issue when deploying ExperienceBundle\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Cp\u003E1.4.1\u003C\u002Fp\u003E\\n\u003Cul\u003E\\n\u003Cli\u003EBugfixing: fixed issue when deploying with --diff a report in a nested folder\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Cp\u003E1.4.0\u003C\u002Fp\u003E\\n\u003Cul\u003E\\n\u003Cli\u003ETransformer api. Api to load unrendered files in memory\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Cp\u003E1.3.6\u003C\u002Fp\u003E\\n\u003Cul\u003E\\n\u003Cli\u003EBugfixing: \u003Ccode\u003E--diff\u003C\u002Fcode\u003E and \u003Ccode\u003E--files\u003C\u002Fcode\u003E flag can be used together\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Cp\u003E1.3.5\u003C\u002Fp\u003E\\n\u003Cul\u003E\\n\u003Cli\u003EBugfixing: \u003Ca href=\\\"https:\u002F\u002Fgithub.com\u002Fmicheletriaca\u002Fsfdy\u002Fissues\u002F8\\\"\u003EHandle --diff that find no diff in src foldes\u003C\u002Fa\u003E\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Cp\u003E1.3.4\u003C\u002Fp\u003E\\n\u003Cul\u003E\\n\u003Cli\u003EBugfixing: \u003Ca href=\\\"https:\u002F\u002Fgithub.com\u002Fmicheletriaca\u002Fsfdy\u002Fissues\u002F10\\\"\u003EDelta deploy of foldered metadata (Report, Document, Email, Dashboard) fails\u003C\u002Fa\u003E\u003C\u002Fli\u003E\\n\u003Cli\u003EMinor Bugfixing\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Cp\u003E1.3.3\u003C\u002Fp\u003E\\n\u003Cul\u003E\\n\u003Cli\u003EBugfixing\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ccode\u003E--files\u003C\u002Fcode\u003E option: now you can pass specific file paths (not glob patterns) even if the files are not present in the filesystem\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Cp\u003E1.3.2\u003C\u002Fp\u003E\\n\u003Cul\u003E\\n\u003Cli\u003EREADME.md fixes\u003C\u002Fli\u003E\\n\u003Cli\u003EStatic resource bundle renderer cleans \u003Ccode\u003E.resource\u003C\u002Fcode\u003E file when active, and the uncompressed folder when inactive\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Cp\u003E1.3.1\u003C\u002Fp\u003E\\n\u003Cul\u003E\\n\u003Cli\u003EREADME.md fixes\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Cp\u003E1.3.0\u003C\u002Fp\u003E\\n\u003Cul\u003E\\n\u003Cli\u003EAdded \u003Ccode\u003EaddRemapper\u003C\u002Fcode\u003E helper function\u003C\u002Fli\u003E\\n\u003Cli\u003EAdded \u003Ccode\u003EaddFiles\u003C\u002Fcode\u003E, \u003Ccode\u003EcleanFiles\u003C\u002Fcode\u003E utility functions to plugin helpers. (See \u003Ca href=\\\"#callback1-filename-fjson-requirefiles-addfiles-cleanfiles\\\"\u003Ehere\u003C\u002Fa\u003E)\u003C\u002Fli\u003E\\n\u003Cli\u003EStatic resource bundle \u003Ca href=\\\"#apply-standard-patches-and-renderers-to-metadata\\\"\u003Erenderer\u003C\u002Fa\u003E\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Cp\u003E1.2.0\u003C\u002Fp\u003E\\n\u003Cul\u003E\\n\u003Cli\u003E\u003Ca href=\\\"#deploy-a-destructive-changeset\\\"\u003Edestructive changesets\u003C\u002Fa\u003E support\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Ccode\u003EREADME.md\u003C\u002Fcode\u003E improvements. Thanks \u003Ca href=\\\"https:\u002F\u002Fgithub.com\u002Ftr4uma\\\"\u003Etr4uma\u003C\u002Fa\u003E\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\u003C\u002Fli\u003E\\n\u003Cli\u003E\u003Cp\u003E1.1.0\u003C\u002Fp\u003E\\n\u003Cul\u003E\\n\u003Cli\u003EFirst release\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\u003C\u002Fli\u003E\\n\u003C\u002Ful\u003E\\n\"}"}</script>
+</div>
+	</body>
+</html>
